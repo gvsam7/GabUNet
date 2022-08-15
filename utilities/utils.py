@@ -92,15 +92,15 @@ def save_predictions_as_imgs(
     loader, model, folder="saved_images/", device="cuda"
 ):
     model.eval()
-    for idx, (x, y) in enumerate(loader):
-        x = x.to(device=device)
+    for idx, (img, mask) in enumerate(loader):
+        img = img.to(device=device)
         with torch.no_grad():
-            preds = torch.sigmoid(model(x))
+            preds = torch.sigmoid(model(img))
             preds = (preds > 0.5).float()
         torchvision.utils.save_image(
             preds, f"{folder}/pred_{idx}.png"
         )
-        torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
+        torchvision.utils.save_image(mask.unsqueeze(1), f"{folder}{idx}.png")
 
     model.train()
 
@@ -112,15 +112,9 @@ def save_table(loader, model, table_name, device):
         im, mask = data
         im = im.to(device=device)
         mask = mask.to(device=device)
-        # mask = mask.unsqueeze(1)
-        # _mask = model(im)
-        # _, _mask = torch.max(_mask, dim=1)
         _mask = torch.sigmoid(model(im))
         _mask = (_mask > 0.5).float()
         _mask = _mask.squeeze(1)
-        print(f"image: {type(im)}, {im.shape}")
-        print(f"mask: {type(mask)}, {mask.shape}")
-        print(f"pred: {type(_mask)}, {_mask.shape}")
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
@@ -148,53 +142,3 @@ def save_table(loader, model, table_name, device):
 
     wandb.log({table_name: table})
 
-
-# def save_table(loader, model, table_name, device, folder="saved_images/"):
-#     table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=True)
-#     model.eval()
-#     for idx, (x, y) in enumerate(loader):
-#         x = x.to(device=device)
-#         with torch.no_grad():
-#             preds = torch.sigmoid(model(x))
-#             preds = (preds > 0.5).float()
-#         # torchvision.utils.save_image(
-#         #     preds, f"{folder}/pred_{idx}.png"
-#         # )
-#         # torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
-#
-#         print(f"x: {type(x)}, {x.shape}")
-#         print(f"y squeezed: {type(y)}, {y.shape}")
-#         y1 = y.unsqueeze(1)
-#         print(f"y unsqueeze: {type(y1)}, {y1.shape}")
-#         print(f"preds: {type(preds)}, {preds.shape}")
-#         pred1 = preds.squeeze(1)
-#         print(f"preds squeezed: {type(pred1)}, {pred1.shape}")
-#
-#         plt.figure(figsize=(10, 10))
-#         plt.axis("off")
-#         plt.imshow(x[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
-#         plt.savefig("original_image.jpg")
-#         plt.close()
-#
-#         plt.figure(figsize=(10, 10))
-#         plt.axis("off")
-#         plt.imshow(y.permute(1, 2, 0).detach().cpu()[:, :, 0])
-#         plt.savefig("original_mask.jpg")
-#         plt.close()
-#
-#         plt.figure(figsize=(10, 10))
-#         plt.axis("off")
-#         # plt.imshow(preds.permute(1, 2, 0).detach().cpu()[:, :, 0])
-#         plt.imshow(preds.permute(2, 3, 0, 1).detach().cpu()[:, :, :, 0])
-#         plt.savefig("predicted_mask.jpg")
-#         plt.close()
-#
-#         table.add_data(
-#             wandb.Image(cv2.cvtColor(cv2.imread("original_image.jpg"), cv2.COLOR_BGR2RGB)),
-#             wandb.Image(cv2.cvtColor(cv2.imread("original_mask.jpg"), cv2.COLOR_BGR2RGB)),
-#             wandb.Image(cv2.cvtColor(cv2.imread("predicted_mask.jpg"), cv2.COLOR_BGR2RGB))
-#         )
-#
-#     wandb.log({table_name: table})
-#
-#     model.train()

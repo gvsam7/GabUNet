@@ -4,8 +4,6 @@ from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
-from matplotlib import pyplot as plt
-import cv2
 import wandb
 from utilities.Hyperparameters import arguments
 from models.UNet import UNet
@@ -114,42 +112,7 @@ def main():
         )
         wandb.save("predictions.png")
 
-        # def save_table(table_name):
-        #     table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=True)
-        #
-        #     for bx, data in tqdm(enumerate(val_loader), total=len(val_loader)):
-        #         im, mask = data
-        #         _mask = model(im)
-        #         _, _mask = torch.max(_mask, dim=1)
-        #
-        #         plt.figure(figsize=(10, 10))
-        #         plt.axis("off")
-        #         plt.imshow(im[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
-        #         plt.savefig("original_image.jpg")
-        #         plt.close()
-        #
-        #         plt.figure(figsize=(10, 10))
-        #         plt.axis("off")
-        #         plt.imshow(mask.permute(1, 2, 0).detach().cpu()[:, :, 0])
-        #         plt.savefig("original_mask.jpg")
-        #         plt.close()
-        #
-        #         plt.figure(figsize=(10, 10))
-        #         plt.axis("off")
-        #         plt.imshow(_mask.permute(1, 2, 0).detach().cpu()[:, :, 0])
-        #         plt.savefig("predicted_mask.jpg")
-        #         plt.close()
-        #
-        #         table.add_data(
-        #             wandb.Image(cv2.cvtColor(cv2.imread("original_image.jpg"), cv2.COLOR_BGR2RGB)),
-        #             wandb.Image(cv2.cvtColor(cv2.imread("original_mask.jpg"), cv2.COLOR_BGR2RGB)),
-        #             wandb.Image(cv2.cvtColor(cv2.imread("predicted_mask.jpg"), cv2.COLOR_BGR2RGB))
-        #         )
-        #
-        #     wandb.log({table_name: table})
-
         save_table(val_loader, model, "Predictions", device)
-        # wandb.log({table_name: table})
 
 
 if __name__ == "__main__":
