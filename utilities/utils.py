@@ -112,6 +112,7 @@ def save_table(loader, model, table_name, device):
         im, mask = data
         im = im.to(device=device)
         mask = mask.to(device=device)
+        mask = mask.unsqueeze(1)
         # _mask = model(im)
         # _, _mask = torch.max(_mask, dim=1)
         _mask = torch.sigmoid(model(im))
