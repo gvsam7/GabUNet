@@ -155,7 +155,8 @@ def save_table(loader, model, table_name, device, folder="saved_images/"):
         # )
         # torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
 
-        print(type(y), y.shape)
+        print(f"x: {type(x)}, {x.shape}")
+        print(f"y squeezed: {type(y)}, {y.shape}")
         y1 = y.unsqueeze(1)
         print(type(y1), y1.shape)
         print(type(preds), preds.shape)
