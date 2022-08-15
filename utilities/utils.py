@@ -105,11 +105,11 @@ def save_predictions_as_imgs(
     model.train()
 
 
-def save_table(loader, model, table_name, device="cuda"):
+def save_table(loader, model, table_name):
     table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=True)
 
     for bx, data in tqdm(enumerate(loader), total=len(loader)):
-        im, mask = data.to(device=device)
+        im, mask = data
         _mask = model(im)
         _, _mask = torch.max(_mask, dim=1)
 
