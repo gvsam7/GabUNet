@@ -114,7 +114,7 @@ def save_table(loader, model, table_name, device):
         mask = mask.to(device=device)
         # _mask = model(im)
         # _, _mask = torch.max(_mask, dim=1)
-        _, _mask = torch.sigmoid(model(im))
+        _mask = torch.sigmoid(model(im))
         _mask = (_mask > 0.5).float()
 
         plt.figure(figsize=(10, 10))
