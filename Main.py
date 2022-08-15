@@ -112,7 +112,7 @@ def main():
         )
         wandb.save("predictions.png")
 
-        save_table(val_loader, model, "Predictions", device)
+    save_table(val_loader, model, "Predictions", device)
 
 
 if __name__ == "__main__":
