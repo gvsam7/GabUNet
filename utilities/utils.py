@@ -117,7 +117,7 @@ def save_table(loader, model, table_name, device):
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
-        plt.imshow(im.permute(1, 2, 0).detach().cpu()[:, :, 0])
+        plt.imshow(im[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
         plt.savefig("original_image.jpg")
         plt.close()
 
