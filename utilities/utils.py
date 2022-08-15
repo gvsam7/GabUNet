@@ -101,6 +101,7 @@ def save_predictions_as_imgs(
             preds, f"{folder}/pred_{idx}.png"
         )
         torchvision.utils.save_image(mask.unsqueeze(1), f"{folder}{idx}.png")
+        torchvision.utils.save_image(img, f"{folder}{idx}.png")
 
     model.train()
 
