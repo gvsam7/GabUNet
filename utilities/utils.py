@@ -150,17 +150,17 @@ def save_table(loader, model, table_name, device, folder="saved_images/"):
         with torch.no_grad():
             preds = torch.sigmoid(model(x))
             preds = (preds > 0.5).float()
-        torchvision.utils.save_image(
-            preds, f"{folder}/pred_{idx}.png"
-        )
-        torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
+        # torchvision.utils.save_image(
+        #     preds, f"{folder}/pred_{idx}.png"
+        # )
+        # torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
 
         print(type(y), y.shape)
         print(type(preds), preds.shape)
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
-        plt.imshow(x[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
+        plt.imshow(x[0].permute(1, 2, 0, 0).detach().cpu()[:, :, :, 0])
         plt.savefig("original_image.jpg")
         plt.close()
 
