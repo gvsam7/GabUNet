@@ -148,7 +148,7 @@ def main():
         #
         #     wandb.log({table_name: table})
 
-        save_table(val_loader, model, "Predictions")
+        save_table(val_loader, model, "Predictions", device)
         # wandb.log({table_name: table})
 
 
