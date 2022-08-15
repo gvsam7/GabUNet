@@ -157,6 +157,7 @@ def save_table(loader, model, table_name, device, folder="saved_images/"):
 
         _mask = model(x)
         _, _mask = torch.sigmoid(_mask)
+        _mask = (_mask > 0.5).float()
         plt.figure(figsize=(10, 10))
         plt.axis("off")
         plt.imshow(x[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
