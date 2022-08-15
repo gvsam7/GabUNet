@@ -159,6 +159,8 @@ def save_table(loader, model, table_name, device, folder="saved_images/"):
         y1 = y.unsqueeze(1)
         print(type(y1), y1.shape)
         print(type(preds), preds.shape)
+        pred1 = pred1.squeeze(1)
+        print(type(pred1), pred1.shape)
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
