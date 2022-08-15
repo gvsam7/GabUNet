@@ -5,6 +5,7 @@ from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
 import wandb
+import os
 from utilities.Hyperparameters import arguments
 from models.UNet import UNet
 from utilities.utils import (
@@ -110,7 +111,7 @@ def main():
         save_predictions_as_imgs(
             val_loader, model, folder="saved_images/", device=device
         )
-        # wandb.save("predictions.png")
+        wandb.save(os.path.join('saved_images', '*'))
 
         save_table(val_loader, model, "Predictions", device)
 
