@@ -156,7 +156,7 @@ def save_table(loader, model, table_name, device, folder="saved_images/"):
         torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
 
         _mask = model(x)
-        _, _mask = torch.sigmiod(_mask, dim=1)
+        _, _mask = torch.sigmoid(_mask)
         plt.figure(figsize=(10, 10))
         plt.axis("off")
         plt.imshow(x[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
