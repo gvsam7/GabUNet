@@ -74,6 +74,8 @@ def main():
     )
 
     model = UNet(in_channels=3, out_channels=1).to(device)
+    if torch.cuda.is_available():
+        model.cuda()
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
