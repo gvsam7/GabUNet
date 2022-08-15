@@ -110,7 +110,7 @@ def save_table(loader, model, table_name, device="cuda"):
 
     for bx, data in tqdm(enumerate(loader), total=len(loader)):
         im, mask = data
-        im.to(device), mask.to(device)
+        im.to(device=device), mask.to(device=device)
         _mask = model(im)
         _, _mask = torch.max(_mask, dim=1)
 
