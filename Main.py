@@ -108,9 +108,7 @@ def main():
         check_accuracy(val_loader, model, device=device)
 
         # print some examples to a folder
-        save_predictions_as_imgs(
-            val_loader, model, folder="saved_images/", device=device
-        )
+        save_predictions_as_imgs(val_loader, model, folder="saved_images/", device=device)
         wandb.save(os.path.join('saved_images', '*'))
 
         save_table(val_loader, model, "Predictions", device)

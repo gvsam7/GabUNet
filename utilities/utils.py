@@ -67,20 +67,16 @@ def check_accuracy(loader, model, device="cuda"):
     model.eval()
 
     with torch.no_grad():
-        for x, y in loader:
-            x = x.to(device)
-            y = y.to(device).unsqueeze(1)
-            preds = torch.sigmoid(model(x))
+        for img, mask in loader:
+            img = img.to(device)
+            mask = mask.to(device).unsqueeze(1)
+            preds = torch.sigmoid(model(img))
             preds = (preds > 0.5).float()
-            num_correct += (preds == y).sum()
+            num_correct += (preds == mask).sum()
             num_pixels += torch.numel(preds)
-            dice_score += (2 * (preds * y).sum()) / (
-                (preds + y).sum() + 1e-8
-            )
+            dice_score += (2 * (preds * mask).sum()) / ((preds + mask).sum() + 1e-8)
 
-    print(
-        f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
-    )
+    print(f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}")
     print(f"Dice score: {dice_score/len(loader)}")
     accuracy = num_correct/num_pixels*100
     model.train()
@@ -88,9 +84,7 @@ def check_accuracy(loader, model, device="cuda"):
     wandb.log({"Accuracy": accuracy})
 
 
-def save_predictions_as_imgs(
-    loader, model, folder="saved_images/", device="cuda"
-):
+def save_predictions_as_imgs(loader, model, folder="saved_images/", device="cuda"):
     model.eval()
     for idx, (img, mask) in enumerate(loader):
         img = img.to(device=device)
