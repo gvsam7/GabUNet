@@ -155,9 +155,6 @@ def save_table(loader, model, table_name, device, folder="saved_images/"):
         )
         torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
 
-        _mask = model(x)
-        _, _mask = torch.sigmoid(_mask)
-        _mask = (_mask > 0.5).float()
         plt.figure(figsize=(10, 10))
         plt.axis("off")
         plt.imshow(x[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
@@ -172,7 +169,7 @@ def save_table(loader, model, table_name, device, folder="saved_images/"):
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
-        plt.imshow(_mask.permute(1, 2, 0).detach().cpu()[:, :, 0])
+        plt.imshow(preds.permute(1, 2, 0).detach().cpu()[:, :, 0])
         plt.savefig("predicted_mask.jpg")
         plt.close()
 
