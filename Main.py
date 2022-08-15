@@ -110,9 +110,9 @@ def main():
         save_predictions_as_imgs(
             val_loader, model, folder="saved_images/", device=device
         )
-        wandb.save("predictions.png")
+        # wandb.save("predictions.png")
 
-    save_table(val_loader, model, "Predictions", device)
+        save_table(val_loader, model, "Predictions", device)
 
 
 if __name__ == "__main__":
