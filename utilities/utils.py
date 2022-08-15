@@ -116,6 +116,9 @@ def save_table(loader, model, table_name, device):
         # _, _mask = torch.max(_mask, dim=1)
         _mask = torch.sigmoid(model(im))
         _mask = (_mask > 0.5).float()
+        print(f"image: {type(im)}, {im.shape}")
+        print(f"mask: {type(mask)}, {mask.shape}")
+        print(f"pred: {type(_mask)}, {_mask.shape}")
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
