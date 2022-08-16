@@ -13,7 +13,10 @@ class G_UNet(nn.Module):
 
         # Down part of UNET
         for feature in features:
-            self.downs.append(GConvBlock(in_channels, feature))
+            if feature == features[0]:
+                self.downs.append(GConvBlock(in_channels, feature))
+            else:
+                self.downs.append(ConvBlock(in_channels, feature))
             in_channels = feature
 
         # Up part of UNET
