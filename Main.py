@@ -1,3 +1,18 @@
+"""
+Author: Georgios Voulgaris
+Date: 10/08/2023
+Description:This project is aiming to research water detection using semantic segmentation.
+            Data: The dataset is comprised of water body images (lakes, rivers) taken from unmanned aerial vehicles
+            (UAV).
+            The images were annotated using VGG Image Annotator (VIA). Then, from the created .jason file masks, of the
+            water bodies were created.
+            Architecture: Initially, a UNet is used to measure its performance when trained on the water bodies dataset.
+            Measurements are in the form of 1. visual inspection of the produced masks on test data, 2. per pixel
+            accuracy, and 3. Dice Score.
+            Aim: This is going to be a test platform of testing various architectures.
+"""
+
+
 import torch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
@@ -47,7 +62,7 @@ def train(loader, model, optimizer, loss_fn, scaler, device):
 
 def main():
     args = arguments()
-    wandb.init(entity="predictive-analytics-lab", project="SemSeg")
+    wandb.init(entity="predictive-analytics-lab", project="SemSeg", config=args)
 
     # Set device
     device = "cuda" if torch.cuda.is_available() else "cpu"
