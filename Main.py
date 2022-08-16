@@ -114,9 +114,9 @@ def main():
     if args.load_model == 'True':
         print(f"Load model is {args.load_model}")
         if device == torch.device("cpu"):
-            load_checkpoint(torch.load("my_checkpoint.pth.tar", map_location=torch.device('cpu')), model)
+            load_checkpoint(torch.load("my_checkpoint.pth.tar", map_location=torch.device('cpu')), model, optimizer)
         else:
-            load_checkpoint(torch.load("my_checkpoint.pth.tar"), model)
+            load_checkpoint(torch.load("my_checkpoint.pth.tar"), model, optimizer)
 
     check_accuracy(val_loader, model, device=device)
     scaler = torch.cuda.amp.GradScaler()
