@@ -8,6 +8,10 @@ import cv2
 import wandb
 
 
+def num_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
 def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
     print("=> Saving checkpoint")
     torch.save(state, filename)
@@ -76,7 +80,7 @@ def check_accuracy(loader, model, device="cuda"):
             num_pixels += torch.numel(preds)
             dice_score += (2 * (preds * mask).sum()) / ((preds + mask).sum() + 1e-8)
 
-    print(f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}")
+    print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     print(f"Dice score: {dice_score/len(loader)}")
     accuracy = num_correct/num_pixels*100
     model.train()

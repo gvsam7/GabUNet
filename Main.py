@@ -24,13 +24,15 @@ import wandb
 import os
 from utilities.Hyperparameters import arguments
 from models.UNet import UNet
+from utilities.Networks import networks
 from utilities.utils import (
     load_checkpoint,
     save_checkpoint,
     get_loaders,
     check_accuracy,
     save_predictions_as_imgs,
-    save_table
+    save_table,
+    num_parameters
 )
 
 TRAIN_IMG_DIR = "data/train_images/"
@@ -88,7 +90,11 @@ def main():
         ]
     )
 
-    model = UNet(in_channels=3, out_channels=1).to(device)
+    model = networks(architecture=args.architecture, in_channels=args.in_channels, out_channels=1).to(device)
+    print(model)
+    n_parameters = num_parameters(model)
+    print(f"The model has {n_parameters:,} trainable parameters")
+    # model = UNet(in_channels=3, out_channels=1).to(device)
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
