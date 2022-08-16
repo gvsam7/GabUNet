@@ -5,9 +5,12 @@
 This project is aiming to research water detection using semantic segmentation.
 
 *Data:* The dataset is comprised of water body images (lakes, rivers) taken from unmanned aerial vehicles (UAV). 
-The images were annotated using VGG Image Annotator (VIA). Then, from the .jason file masks of the water bodies were created.
+The images were annotated using VGG Image Annotator (VIA). Then, from the .json file masks of the water bodies were created.
 
-*Architecture:* Initially, a UNet is used to measure its performance when trained on the waterbodies dataset. Measurements are in the form of 1. visual inspection of the produced masks on test data, 2. per pixel accuracy, and 3. Dice Score.
+*Architecture:* Initially, a UNet is used to measure its performance when trained on the waterbodies dataset. Measurements are in the form of:
+- Visual inspection of the produced masks on test data, 
+- Per pixel accuracy, 
+- Dice Score.
 
 *Aim:* This is going to be a test platform of testing various architectures.  
 
