@@ -1,6 +1,6 @@
 """
 Author: Georgios Voulgaris
-Date: 10/08/2023
+Date: 10/08/2022
 Description:This project is aiming to research water detection using semantic segmentation.
             Data: The dataset is comprised of water body images (lakes, rivers) taken from unmanned aerial vehicles
             (UAV).
@@ -11,7 +11,6 @@ Description:This project is aiming to research water detection using semantic se
             accuracy, and 3. Dice Score.
             Aim: This is going to be a test platform of testing various architectures.
 """
-
 
 import torch
 import albumentations as A
@@ -38,7 +37,7 @@ VAL_IMG_DIR = "data/val_images/"
 VAL_MASK_DIR = "data/val_masks/"
 
 
-def train(loader, model, optimizer, loss_fn, scaler, device):
+def train(loader, model, optimizer, criterion, scaler, device):
     loop = tqdm(loader)
 
     for batch_idx, (data, targets) in enumerate(loop):
@@ -48,7 +47,7 @@ def train(loader, model, optimizer, loss_fn, scaler, device):
         # forward
         with torch.cuda.amp.autocast():
             predictions = model(data)
-            loss = loss_fn(predictions, targets)
+            loss = criterion(predictions, targets)
 
         # backward
         optimizer.zero_grad()
@@ -88,7 +87,7 @@ def main():
     )
 
     model = UNet(in_channels=3, out_channels=1).to(device)
-    loss_fn = nn.BCEWithLogitsLoss()
+    criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     train_loader, val_loader = get_loaders(
@@ -103,21 +102,28 @@ def main():
         args.pin_memory,
     )
 
-    if args.load_model:
-        load_checkpoint(torch.load("my_checkpoint.pth.tar"), model)
+    # Load model
+    if args.load_model == 'True':
+        print(f"Load model is {args.load_model}")
+        if device == torch.device("cpu"):
+            load_checkpoint(torch.load("my_checkpoint.pth.tar", map_location=torch.device('cpu')), model, optimizer)
+        else:
+            load_checkpoint(torch.load("my_checkpoint.pth.tar"), model, optimizer)
 
     check_accuracy(val_loader, model, device=device)
     scaler = torch.cuda.amp.GradScaler()
 
     for epoch in range(args.epochs):
-        train(train_loader, model, optimizer, loss_fn, scaler, device)
+        train(train_loader, model, optimizer, criterion, scaler, device)
 
-        # save model
-        checkpoint = {
-            "state_dict": model.state_dict(),
-            "optimizer": optimizer.state_dict(),
-        }
-        save_checkpoint(checkpoint)
+        # Saving model
+        if args.save_model == 'True':
+            if epoch % 10 == 0:
+                checkpoint = {
+                    "state_dict": model.state_dict(),
+                    "optimizer": optimizer.state_dict(),
+                }
+                save_checkpoint(checkpoint)
 
         # check accuracy
         check_accuracy(val_loader, model, device=device)
