@@ -14,6 +14,8 @@ The images were annotated using VGG Image Annotator (VIA). Then, from the .json 
 
 *Aim:* This is going to be a test platform of testing various architectures.  
 
+![alt text](https://github.com/gvsam7/GabUNet/blob/main/Images/UNet_Preds.jpg)
+
 ## Google Colab
 - UNet (CAM)[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1-HAt29Kz1Lj8f8AnThhzK0s4IQi7q3sN)
 
