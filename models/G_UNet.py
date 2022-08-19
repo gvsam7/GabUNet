@@ -5,7 +5,7 @@ from models.ConvBlock import GConvBlock, ConvBlock
 
 
 class G_UNet(nn.Module):
-    def __init__(self, in_channels=3, out_channels=1, features=[64, 128, 256, 512]):
+    def __init__(self, in_channels=3, out_channels=1, features=[32, 64, 128, 256, 512]):
         super(G_UNet, self).__init__()
         self.ups = nn.ModuleList()
         self.downs = nn.ModuleList()
