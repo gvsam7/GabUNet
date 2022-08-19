@@ -10,8 +10,8 @@ class MAC_UNet(nn.Module):
         self.class_num = class_num
         self.name = 'MAC_UNet'
 
-        channels = [16, 32, 64, 128, 256, 512]
-        # channels = [32, 64, 128, 256, 512]
+        # channels = [16, 32, 64, 128, 256, 512]
+        channels = [32, 64, 128, 256, 512]  # seems to give the best results
         # channels = [64, 128, 256, 512]
         self.conv1 = nn.Sequential(
             ACBlock(self.band_num, channels[0]),
