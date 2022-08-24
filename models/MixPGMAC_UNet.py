@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from models.ConvBlock import ChannelAttention, ACBlock, GACBlock
-from models import MixPool
+from models.MixPool import MixPool
 
 
 class MixPGMAC_UNet(nn.Module):
