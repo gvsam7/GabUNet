@@ -19,52 +19,52 @@ class MixPGMAC_UNet(nn.Module):
             GACBlock(channels[0], channels[0])
         )
         self.conv12 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=1),
+            MixPool(2, 2, 0, 1),
             ACBlock(channels[0], channels[1])
         )
         self.conv13 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=1),
+            MixPool(2, 2, 0, 1),
             ACBlock(channels[1], channels[2])
         )
         self.conv14 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=1),
+            MixPool(2, 2, 0, 1),
             ACBlock(channels[2], channels[3])
         )
 
         self.conv2 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=0.6),
+            MixPool(2, 2, 0, 0.6),
             ACBlock(channels[0], channels[1]),
             ACBlock(channels[1], channels[1])
         )
         self.conv23 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=0.6),
+            MixPool(2, 2, 0, 0.6),
             ACBlock(channels[1], channels[2])
         )
         self.conv24 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=0.6),
+            MixPool(2, 2, 0, 0.6),
             ACBlock(channels[2], channels[3])
         )
 
         self.conv3 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=0.4),
+            MixPool(2, 2, 0, 0.4),
             ACBlock(channels[1], channels[2]),
             ACBlock(channels[2], channels[2]),
             ACBlock(channels[2], channels[2])
         )
         self.conv34 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=0.4),
+            MixPool(2, 2, 0, 0.4),
             ACBlock(channels[2], channels[3])
         )
 
         self.conv4 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=0.2),
+            MixPool(2, 2, 0, 0.2),
             ACBlock(channels[2], channels[3]),
             ACBlock(channels[3], channels[3]),
             ACBlock(channels[3], channels[3])
         )
 
         self.conv5 = nn.Sequential(
-            MixPool(kernel_size=2, stride=2, padding=0, aplha=0.2),
+            MixPool(2, 2, 0, 0.2),
             ACBlock(channels[3], channels[4]),
             ACBlock(channels[4], channels[4]),
             ACBlock(channels[4], channels[4])
