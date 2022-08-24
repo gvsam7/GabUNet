@@ -16,7 +16,7 @@ def arguments():
     parser.add_argument("--save-model", default=True)
     parser.add_argument("--load-model", default=False)
     parser.add_argument("--pretrained", default=True)
-    parser.add_argument("--architecture", default='unet', help='unet=UNet, gunet=G_UNet, mac_unet =MAC_UNet, '
-                                                               'gmac_unet =GMAC_UNet')
+    parser.add_argument("--architecture", default='unet', help='unet=UNet, gunet=G_UNet, mac_unet=MAC_UNet, '
+                                                               'gmac_unet=GMAC_UNet, mixpgmac_unet=MixPGMAC_UNet')
 
     return parser.parse_args()
