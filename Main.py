@@ -23,7 +23,6 @@ import torch.optim as optim
 import wandb
 import os
 from utilities.Hyperparameters import arguments
-from models.UNet import UNet
 from utilities.Networks import networks
 from utilities.utils import (
     load_checkpoint,
@@ -97,7 +96,6 @@ def main():
     print(model)
     n_parameters = num_parameters(model)
     print(f"The model has {n_parameters:,} trainable parameters")
-    # model = UNet(in_channels=3, out_channels=1).to(device)
     if args.num_class == 1:
         criterion = nn.BCEWithLogitsLoss()  # 1-class semantic segmentation
     else:
