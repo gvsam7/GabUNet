@@ -137,6 +137,7 @@ class MAC_UNet(nn.Module):
         deconv31 = self.deconv31(deconv32)
 
         conv7 = torch.cat((deconv3, deconv43, conv3, conv23, conv13), 1)
+        # print(conv7.size())
         conv7 = self.skblock3(conv7)
         conv7 = self.conv7(conv7)
         del deconv3, deconv43, conv3, conv23, conv13, conv6

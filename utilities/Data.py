@@ -1,4 +1,15 @@
 # Create a data loading
+import logging
+from os import listdir
+from os.path import splitext
+from pathlib import Path
+
+import numpy as np
+import torch
+from PIL import Image
+from torch.utils.data import Dataset
+
+
 import os
 from PIL import Image
 from torch.utils.data import Dataset
@@ -20,7 +31,7 @@ class WaterDataset(Dataset):
         img_path = os.path.join(self.image_dir, self.images[index])
         mask_path = os.path.join(self.mask_dir, self.images[index].replace(".jpg", ".png"))
         image = np.array(Image.open(img_path).convert("RGB"))
-        mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32)
+        mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32)  # L is for gray scale images
         # create some pre-process for the mask, and will look for where it is equal to 255 and will change that to 1
         mask[mask == 255.0] = 1.0  # the reason is because I am using a sigmoid on the last activation indicating the probability it is white pixel and to make sure that it is correct for labels, we will convert those to one.
 

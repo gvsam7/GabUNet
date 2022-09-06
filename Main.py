@@ -35,18 +35,21 @@ from utilities.utils import (
     num_parameters
 )
 
-TRAIN_IMG_DIR = "data/train_images/"
-TRAIN_MASK_DIR = "data/train_masks/"
-VAL_IMG_DIR = "data/val_images/"
-VAL_MASK_DIR = "data/val_masks/"
+TRAIN_IMG_DIR = "Data/train_images/"
+TRAIN_MASK_DIR = "Data/train_masks/"
+VAL_IMG_DIR = "Data/val_images/"
+VAL_MASK_DIR = "Data/val_masks/"
 
 
-def train(loader, model, optimizer, criterion, scaler, device):
+def train(loader, model, optimizer, criterion, scaler, num_class, device):
     loop = tqdm(loader)
 
     for batch_idx, (data, targets) in enumerate(loop):
         data = data.to(device=device)
-        targets = targets.float().unsqueeze(1).to(device=device)
+        if num_class == 1:
+            targets = targets.float().unsqueeze(1).to(device=device)
+        else:
+            targets = targets.long().to(device=device)
 
         # forward
         with torch.cuda.amp.autocast():
@@ -90,12 +93,16 @@ def main():
         ]
     )
 
-    model = networks(architecture=args.architecture, in_channels=args.in_channels, out_channels=1).to(device)
+    model = networks(architecture=args.architecture, in_channels=args.in_channels, num_class=args.num_class).to(device)
     print(model)
     n_parameters = num_parameters(model)
     print(f"The model has {n_parameters:,} trainable parameters")
     # model = UNet(in_channels=3, out_channels=1).to(device)
-    criterion = nn.BCEWithLogitsLoss()
+    if args.num_class == 1:
+        criterion = nn.BCEWithLogitsLoss()  # 1-class semantic segmentation
+    else:
+        criterion = nn.CrossEntropyLoss()
+    print(f"criterion: {criterion}")
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     train_loader, val_loader = get_loaders(
@@ -118,11 +125,11 @@ def main():
         else:
             load_checkpoint(torch.load("my_checkpoint.pth.tar"), model, optimizer)
 
-    check_accuracy(val_loader, model, device=device)
+    check_accuracy(val_loader, model, device=device, num_class=args.num_class)
     scaler = torch.cuda.amp.GradScaler()
 
     for epoch in range(args.epochs):
-        train(train_loader, model, optimizer, criterion, scaler, device)
+        train(train_loader, model, optimizer, criterion, scaler, args.num_class, device)
 
         # Saving model
         if args.save_model == 'True':
@@ -134,7 +141,7 @@ def main():
                 save_checkpoint(checkpoint)
 
         # check accuracy
-        check_accuracy(val_loader, model, device=device)
+        check_accuracy(val_loader, model, device=device, num_class=args.num_class)
 
         # print some examples to a folder
         save_predictions_as_imgs(val_loader, model, folder="saved_images/", device=device)

@@ -5,7 +5,7 @@ from models.ConvBlock import ConvBlock
 
 
 class UNet(nn.Module):
-    def __init__(self, in_channels=3, out_channels=1, features=[32, 64, 128, 256, 512]):
+    def __init__(self, in_channels, num_class, features=[32, 64, 128, 256, 512]):
         super(UNet, self).__init__()
         self.ups = nn.ModuleList()
         self.downs = nn.ModuleList()
@@ -26,7 +26,7 @@ class UNet(nn.Module):
             self.ups.append(ConvBlock(feature * 2, feature))
 
         self.bottleneck = ConvBlock(features[-1], features[-1] * 2)
-        self.final_conv = nn.Conv2d(features[0], out_channels, kernel_size=1)
+        self.final_conv = nn.Conv2d(features[0], num_class, kernel_size=1)
 
     def forward(self, x):
         skip_connections = []
@@ -54,7 +54,7 @@ class UNet(nn.Module):
 
 # def test():
 #     x = torch.randn((3, 1, 161, 161))
-#     model = UNet(in_channels=1, out_channels=1)
+#     model = UNet(in_channels=1, num_class=1)
 #     preds = model(x)
 #     assert preds.shape == x.shape
 #

@@ -1,5 +1,7 @@
 import torch
 import torchvision
+import torch.nn as nn
+import torch.nn.functional as F
 from utilities.Data import WaterDataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -64,7 +66,7 @@ def get_loaders(
     return train_loader, val_loader
 
 
-def check_accuracy(loader, model, device="cuda"):
+def check_accuracy(loader, model, num_class, device="cuda"):
     num_correct = 0
     num_pixels = 0
     dice_score = 0
@@ -73,9 +75,16 @@ def check_accuracy(loader, model, device="cuda"):
     with torch.no_grad():
         for img, mask in loader:
             img = img.to(device)
-            mask = mask.to(device).unsqueeze(1)
-            preds = torch.sigmoid(model(img))
-            preds = (preds > 0.5).float()
+            # mask = mask.to(device).unsqueeze(1)
+            if num_class == 1:
+                mask = mask.to(device).unsqueeze(1)
+                preds = torch.sigmoid(model(img))  # when binary 1-class semantic segmentation
+                preds = (preds > 0.5).float()  # 1 class semantic segmentation
+            else:
+                mask = mask.to(device)
+                softmax = nn.Softmax(dim=1)
+                preds = torch.argmax(softmax(model(img)), axis=1)
+                # preds = F.softmax((model(img)), dim=1)
             num_correct += (preds == mask).sum()
             num_pixels += torch.numel(preds)
             dice_score += (2 * (preds * mask).sum()) / ((preds + mask).sum() + 1e-8)
