@@ -2,6 +2,7 @@ import torch
 import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 from utilities.Data import WaterDataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -91,19 +92,48 @@ def check_accuracy(loader, model, num_class, device="cuda"):
 
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     print(f"Dice score: {dice_score/len(loader)}")
+    print(f"mIoU score: {mIoU(preds, mask)}")
     accuracy = num_correct/num_pixels*100
     model.train()
     wandb.log({"Dice Score": dice_score/len(loader)})
     wandb.log({"Accuracy": accuracy})
+    wandb.log({"mIoU Score": mIoU(preds, mask)})
 
 
-def save_predictions_as_imgs(loader, model, folder="saved_images/", device="cuda"):
+def mIoU(pred_mask, mask, smooth=1e-10, n_classes=23):
+    with torch.no_grad():
+        pred_mask = F.softmax(pred_mask, dim=1)
+        pred_mask = torch.argmax(pred_mask, dim=1)
+        pred_mask = pred_mask.contiguous().view(-1)
+        mask = mask.contiguous().view(-1)
+
+        iou_per_class = []
+        for clas in range(0, n_classes): #loop per pixel class
+            true_class = pred_mask == clas
+            true_label = mask == clas
+
+            if true_label.long().sum().item() == 0: #no exist label in this loop
+                iou_per_class.append(np.nan)
+            else:
+                intersect = torch.logical_and(true_class, true_label).sum().float().item()
+                union = torch.logical_or(true_class, true_label).sum().float().item()
+
+                iou = (intersect + smooth) / (union +smooth)
+                iou_per_class.append(iou)
+        return np.nanmean(iou_per_class)
+
+
+def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", device="cuda"):
     model.eval()
     for idx, (img, mask) in enumerate(loader):
         img = img.to(device=device)
         with torch.no_grad():
-            preds = torch.sigmoid(model(img))
-            preds = (preds > 0.5).float()
+            if num_class == 1:
+                preds = torch.sigmoid(model(img))
+                preds = (preds > 0.5).float()
+            else:
+                softmax = nn.Softmax(dim=1)
+                preds = torch.argmax(softmax(model(img)), axis=1)
         torchvision.utils.save_image(
             preds, f"{folder}/pred_{idx}.png"
         )
