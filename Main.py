@@ -34,10 +34,10 @@ from utilities.utils import (
     num_parameters
 )
 
-TRAIN_IMG_DIR = "Data/train_images/"
-TRAIN_MASK_DIR = "Data/train_masks/"
-VAL_IMG_DIR = "Data/val_images/"
-VAL_MASK_DIR = "Data/val_masks/"
+TRAIN_IMG_DIR = "Data_test/train_images/"
+TRAIN_MASK_DIR = "Data_test/train_masks/"
+VAL_IMG_DIR = "Data_test/val_images/"
+VAL_MASK_DIR = "Data_test/val_masks/"
 
 
 def train(loader, model, optimizer, criterion, scaler, num_class, device):

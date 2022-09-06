@@ -1,15 +1,3 @@
-# Create a data loading
-import logging
-from os import listdir
-from os.path import splitext
-from pathlib import Path
-
-import numpy as np
-import torch
-from PIL import Image
-from torch.utils.data import Dataset
-
-
 import os
 from PIL import Image
 from torch.utils.data import Dataset
