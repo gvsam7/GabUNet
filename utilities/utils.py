@@ -92,8 +92,9 @@ def check_accuracy(loader, model, num_class, device="cuda"):
             num_pixels += torch.numel(preds)
             dice_score += (2 * (preds * mask).sum()) / ((preds + mask).sum() + 1e-8)
 
+            pred = torch.tensor(preds)
             jaccard = JaccardIndex(num_classes=num_class)
-            jaccard(preds, mask)
+            jaccard(pred, mask)
 
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     print(f"Dice score: {dice_score/len(loader)}")
