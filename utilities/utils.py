@@ -128,15 +128,12 @@ def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", d
     for idx, (img, mask) in enumerate(loader):
         img = img.to(device=device)
         with torch.no_grad():
-            softmax = nn.Softmax(dim=1)
-            preds = torch.argmax(softmax(model(img)), axis=1)
-            """
             if num_class == 1:
                 preds = torch.sigmoid(model(img))
                 preds = (preds > 0.5).float()
             else:
                 softmax = nn.Softmax(dim=1)
-                preds = torch.argmax(softmax(model(img)), axis=1)"""
+                preds = torch.argmax(softmax(model(img)), axis=1)
         torchvision.utils.save_image(
             preds, f"{folder}/pred_{idx}.png"
         )
