@@ -3,6 +3,8 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+import torchmetrics
+from torchmetrics import JaccardIndex
 from utilities.Data import WaterDataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -90,14 +92,19 @@ def check_accuracy(loader, model, num_class, device="cuda"):
             num_pixels += torch.numel(preds)
             dice_score += (2 * (preds * mask).sum()) / ((preds + mask).sum() + 1e-8)
 
+            jaccard = JaccardIndex(num_classes=num_class)
+            jaccard(preds, mask)
+
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     print(f"Dice score: {dice_score/len(loader)}")
-    print(f"mIoU score: {mIoU(preds, mask)}")
+    # print(f"mIoU score: {mIoU(preds, mask)}")
+    print(f"mIoU score: {jaccard(preds, mask)}")
     accuracy = num_correct/num_pixels*100
     model.train()
     wandb.log({"Dice Score": dice_score/len(loader)})
     wandb.log({"Accuracy": accuracy})
-    wandb.log({"mIoU Score": mIoU(preds, mask)})
+    # wandb.log({"mIoU Score": mIoU(preds, mask)})
+    wandb.log({"mIoU Score": jaccard(preds, mask)})
 
 
 def mIoU(pred_mask, mask, smooth=1e-10, n_classes=23):
