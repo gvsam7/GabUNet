@@ -136,7 +136,8 @@ def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", d
                 preds = torch.argmax(softmax(model(img)), axis=1)
                 preds = preds.float()
                 preds = preds.unsqueeze(1)
-        torchvision.utils.save_image(mask.unsqueeze(1), f"{folder}{idx}.png")
+        # torchvision.utils.save_image(mask.unsqueeze(1), f"{folder}{idx}.png")
+        torchvision.utils.save_image(mask, f"{folder}{idx}.png")
         torchvision.utils.save_image(img, f"{folder}/img_{idx}.png")
         torchvision.utils.save_image(preds, f"{folder}/pred_{idx}.png")
 
