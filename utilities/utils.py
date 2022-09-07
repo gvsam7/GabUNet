@@ -149,16 +149,20 @@ def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", d
     model.train()
 
 
-def save_table(loader, model, table_name, device):
+def save_table(loader, model, num_class, table_name, device):
     table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=True)
 
     for bx, data in tqdm(enumerate(loader), total=len(loader)):
         im, mask = data
         im = im.to(device=device)
         mask = mask.to(device=device)
-        _mask = torch.sigmoid(model(im))
-        _mask = (_mask > 0.5).float()
-        _mask = _mask.squeeze(1)
+        if num_class == 1:
+            _mask = torch.sigmoid(model(im))
+            _mask = (_mask > 0.5).float()
+            _mask = _mask.squeeze(1)
+        else:
+            softmax = nn.Softmax(dim=1)
+            _mask = torch.argmax(softmax(model(im)), axis=1)
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
