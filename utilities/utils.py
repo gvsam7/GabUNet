@@ -71,6 +71,7 @@ def check_accuracy(loader, model, num_class, device="cuda"):
     num_correct = 0
     num_pixels = 0
     dice_score = 0
+    IoU = 0
     model.eval()
 
     with torch.no_grad():
@@ -89,17 +90,20 @@ def check_accuracy(loader, model, num_class, device="cuda"):
             num_correct += (preds == mask).sum()
             num_pixels += torch.numel(preds)
             dice_score += (2 * (preds * mask).sum()) / ((preds + mask).sum() + 1e-8)
+            IoU += (preds * mask).sum() / ((preds + mask).sum() + 1e-8)
 
-            jaccard = mIoU(preds, mask, num_class)
+            med_jaccard = mIoU(preds, mask, num_class)
 
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     print(f"Dice score: {dice_score/len(loader)}")
-    print(f"mIoU score: {jaccard}")
+    print(f"IoU score: {IoU}")
+    print(f"mIoU score: {med_jaccard}")
     accuracy = num_correct/num_pixels*100
     model.train()
     wandb.log({"Dice Score": dice_score/len(loader)})
+    wandb.log({"IoU score": IoU/len(loader)})
     wandb.log({"Accuracy": accuracy})
-    wandb.log({"mIoU Score": jaccard})
+    wandb.log({"mIoU Score": med_jaccard})
 
 
 def mIoU(pred_mask, mask, n_classes, smooth=1e-10):
