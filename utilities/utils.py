@@ -119,7 +119,7 @@ def Dice(pred_mask, mask, n_classes, smooth=1e-10):
             true_class = pred_mask == clas
             true_label = mask == clas
 
-            if true_label.long().item() == 0: # Non existing labels in this loop
+            if true_label.long().sum().item() == 0: # Non existing labels in this loop
                 dice_per_class.append(np.nan)
 
             else:
