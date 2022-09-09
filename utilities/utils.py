@@ -97,16 +97,16 @@ def check_accuracy(loader, model, num_class, device="cuda"):
 
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     # print(f"Dice score: {dice_score/len(loader)}")
-    print(f"Dice score: {dice}")
-    print(f"IoU score: {IoU}")
-    print(f"mIoU score: {med_jaccard}")
+    print(f"Dice score: {dice/len(loader)}")
+    print(f"IoU score: {IoU/len(loader)}")
+    print(f"mIoU score: {med_jaccard/len(loader)}")
     accuracy = num_correct/num_pixels*100
     model.train()
     # wandb.log({"Dice Score": dice_score/len(loader)})
-    wandb.log({"Dice Score": dice})
+    wandb.log({"Dice Score": dice/len(loader)})
     wandb.log({"IoU score": IoU/len(loader)})
     wandb.log({"Accuracy": accuracy})
-    wandb.log({"mIoU Score": med_jaccard})
+    wandb.log({"mIoU Score": med_jaccard/len(loader)})
 
 
 def Dice(pred_mask, mask, n_classes, smooth=1e-10):
@@ -128,7 +128,7 @@ def Dice(pred_mask, mask, n_classes, smooth=1e-10):
 
                 dice = (2 * intersect) / (union + smooth)
                 dice_per_class.append(dice)
-        return dice_per_class
+        return np.nanmean(dice_per_class)
 
 
 def mIoU(pred_mask, mask, n_classes, smooth=1e-10):
