@@ -126,8 +126,8 @@ def Dice(pred_mask, mask, n_classes, smooth=1e-10):
                 intersect = torch.logical_and(true_class, true_label).sum().float().item()
                 union = torch.logical_or(true_class, true_label).sum().float().item()
 
-            dice = ((2 * intersect) + smooth) / (union + smooth)
-            dice_per_class.append(dice)
+                dice = (2 * intersect) / (union + smooth)
+                dice_per_class.append(dice)
         return dice_per_class
 
 
@@ -147,7 +147,7 @@ def mIoU(pred_mask, mask, n_classes, smooth=1e-10):
                 intersect = torch.logical_and(true_class, true_label).sum().float().item()
                 union = torch.logical_or(true_class, true_label).sum().float().item()
 
-                iou = (intersect + smooth) / (union +smooth)
+                iou = (intersect + smooth) / (union + smooth)
                 iou_per_class.append(iou)
         return np.nanmean(iou_per_class)
 
