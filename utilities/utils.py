@@ -97,13 +97,13 @@ def check_accuracy(loader, model, num_class, device="cuda"):
 
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     # print(f"Dice score: {dice_score/len(loader)}")
-    print(f"Dice score: {dice/len(loader)}")
+    print(f"Dice score: {dice}")
     print(f"IoU score: {IoU}")
     print(f"mIoU score: {med_jaccard}")
     accuracy = num_correct/num_pixels*100
     model.train()
     # wandb.log({"Dice Score": dice_score/len(loader)})
-    wandb.log({"Dice Score": dice/len(loader)})
+    wandb.log({"Dice Score": dice})
     wandb.log({"IoU score": IoU/len(loader)})
     wandb.log({"Accuracy": accuracy})
     wandb.log({"mIoU Score": med_jaccard})
