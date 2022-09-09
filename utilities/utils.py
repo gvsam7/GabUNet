@@ -93,17 +93,42 @@ def check_accuracy(loader, model, num_class, device="cuda"):
             IoU += (preds * mask).sum() / ((preds + mask).sum() + 1e-8)
 
             med_jaccard = mIoU(preds, mask, num_class)
+            dice = Dice(preds, mask, num_class)
 
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
-    print(f"Dice score: {dice_score/len(loader)}")
+    # print(f"Dice score: {dice_score/len(loader)}")
+    print(f"Dice score: {dice/len(loader)}")
     print(f"IoU score: {IoU}")
     print(f"mIoU score: {med_jaccard}")
     accuracy = num_correct/num_pixels*100
     model.train()
-    wandb.log({"Dice Score": dice_score/len(loader)})
+    # wandb.log({"Dice Score": dice_score/len(loader)})
+    wandb.log({"Dice Score": dice/len(loader)})
     wandb.log({"IoU score": IoU/len(loader)})
     wandb.log({"Accuracy": accuracy})
     wandb.log({"mIoU Score": med_jaccard})
+
+
+def Dice(pred_mask, mask, n_classes, smooth=1e-10):
+    with torch.no_grad():
+        pred_mask = pred_mask.continous().view(-1)
+        mask = mask.continous().view(-1)
+
+        dice_per_class = []
+        for clas in range(0, n_classes):
+            true_class = pred_mask == clas
+            true_label = mask == clas
+
+            if true_label.long().item() == 0: # Non existing labels in this loop
+                dice_per_class.append(np.nan)
+
+            else:
+                intersect = torch.logical_and(true_class, true_label).sum().float().item
+                union = torch.logical_or(true_class, true_label).sum().float().item()
+
+            dice = (2 * intersect) / (union + smooth)
+            dice_per_class.append(dice)
+        return dice_per_class
 
 
 def mIoU(pred_mask, mask, n_classes, smooth=1e-10):
