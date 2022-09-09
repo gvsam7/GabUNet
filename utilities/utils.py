@@ -72,6 +72,8 @@ def check_accuracy(loader, model, num_class, device="cuda"):
     num_pixels = 0
     dice_score = 0
     IoU = 0
+    med_jaccard = 0
+    dice = 0
     model.eval()
 
     with torch.no_grad():
@@ -92,8 +94,8 @@ def check_accuracy(loader, model, num_class, device="cuda"):
             dice_score += (2 * (preds * mask).sum()) / ((preds + mask).sum() + 1e-8)
             IoU += (preds * mask).sum() / ((preds + mask).sum() + 1e-8)
 
-            med_jaccard = mIoU(preds, mask, num_class)
-            dice = Dice(preds, mask, num_class)
+            med_jaccard += mIoU(preds, mask, num_class)
+            dice += Dice(preds, mask, num_class)
 
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     # print(f"Dice score: {dice_score/len(loader)}")
