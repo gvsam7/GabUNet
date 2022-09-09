@@ -111,8 +111,8 @@ def check_accuracy(loader, model, num_class, device="cuda"):
 
 def Dice(pred_mask, mask, n_classes, smooth=1e-10):
     with torch.no_grad():
-        pred_mask = pred_mask.continous().view(-1)
-        mask = mask.continous().view(-1)
+        pred_mask = pred_mask.contiguous().view(-1)
+        mask = mask.contiguous().view(-1)
 
         dice_per_class = []
         for clas in range(0, n_classes):
