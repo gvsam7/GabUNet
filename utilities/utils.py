@@ -3,7 +3,7 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from utilities.Data import WaterDataset
+from utilities.Data import WaterDataset, Dataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from matplotlib import pyplot as plt
@@ -26,20 +26,33 @@ def load_checkpoint(checkpoint, model):
 
 
 def get_loaders(
-    train_dir,
-    train_maskdir,
-    val_dir,
-    val_maskdir,
+    # train_dir,
+    # train_maskdir,
+    # val_dir,
+    # val_maskdir,
+    image_path,
+    mask_path,
+    X_train,
+    X_val,
+    X_test,
     batch_size,
     train_transform,
     val_transform,
+    test_transform,
     num_workers=4,
     pin_memory=True,
 ):
-    train_ds = WaterDataset(
+    """train_ds = WaterDataset(
         image_dir=train_dir,
         mask_dir=train_maskdir,
         transform=train_transform,
+    )"""
+
+    train_ds = Dataset(
+        img_path=image_path,
+        mask_path=mask_path,
+        ds=X_train,
+        transform=train_transform
     )
 
     train_loader = DataLoader(
@@ -50,10 +63,16 @@ def get_loaders(
         shuffle=True,
     )
 
-    val_ds = WaterDataset(
+    """val_ds = WaterDataset(
         image_dir=val_dir,
         mask_dir=val_maskdir,
         transform=val_transform,
+    )"""
+    val_ds = Dataset(
+        img_path=image_path,
+        mask_path=mask_path,
+        ds=X_val,
+        transform=val_transform
     )
 
     val_loader = DataLoader(
@@ -64,15 +83,31 @@ def get_loaders(
         shuffle=False,
     )
 
-    return train_loader, val_loader
+    test_ds = Dataset(
+        img_path=image_path,
+        mask_path=mask_path,
+        ds=X_test,
+        transform=test_transform
+    )
+
+    test_loader = DataLoader(
+        test_ds,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        shuffle=False,
+    )
+
+    return train_loader, val_loader, test_loader
 
 
 def check_accuracy(loader, model, num_class, device="cuda"):
     num_correct = 0
     num_pixels = 0
     dice_score = 0
-    IoU = 0
+    # IoU = 0
     med_jaccard = 0
+    jaccard = 0
     dice = 0
     model.eval()
 
@@ -89,26 +124,50 @@ def check_accuracy(loader, model, num_class, device="cuda"):
                 softmax = nn.Softmax(dim=1)
                 preds = torch.argmax(softmax(model(img)), axis=1)
                 # preds = F.softmax((model(img)), dim=1)
+
             num_correct += (preds == mask).sum()
             num_pixels += torch.numel(preds)
             dice_score += (2 * (preds * mask).sum()) / ((preds + mask).sum() + 1e-8)
-            IoU += (preds * mask).sum() / ((preds + mask).sum() + 1e-8)
+            # IoU += (preds * mask).sum() / ((preds + mask).sum() + 1e-8)
 
             med_jaccard += mIoU(preds, mask, num_class)
             dice += Dice(preds, mask, num_class)
+            jaccard += IoU(preds, mask, num_class)
 
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     # print(f"Dice score: {dice_score/len(loader)}")
     print(f"Dice score: {dice/len(loader)}")
-    print(f"IoU score: {IoU/len(loader)}")
+    print(f"IoU score: {jaccard/len(loader)}")
     print(f"mIoU score: {med_jaccard/len(loader)}")
     accuracy = num_correct/num_pixels*100
     model.train()
     # wandb.log({"Dice Score": dice_score/len(loader)})
     wandb.log({"Dice Score": dice/len(loader)})
-    wandb.log({"IoU score": IoU/len(loader)})
+    wandb.log({"IoU score": jaccard/len(loader)})
     wandb.log({"Accuracy": accuracy})
     wandb.log({"mIoU Score": med_jaccard/len(loader)})
+
+
+def IoU(pred_mask, mask, n_classes, smooth=1e-10):
+    with torch.no_grad():
+        pred_mask = pred_mask.contiguous().view(-1)
+        mask = mask.contiguous().view(-1)
+
+        jaccard_per_class = []
+        for clas in range(0, n_classes):
+            true_class = pred_mask == clas
+            true_label = mask == clas
+
+            if true_label.long().sum().item() == 0:  # Non existing labels in this loop
+                jaccard_per_class.append(np.nan)
+
+            else:
+                intersect = torch.logical_and(true_class, true_label).sum().float().item()
+                union = torch.logical_or(true_class, true_label).sum().float().item()
+
+                jaccard = intersect / (union + smooth)
+                jaccard_per_class.append(jaccard)
+        return np.nanmean(jaccard_per_class)
 
 
 def Dice(pred_mask, mask, n_classes, smooth=1e-10):
@@ -121,7 +180,7 @@ def Dice(pred_mask, mask, n_classes, smooth=1e-10):
             true_class = pred_mask == clas
             true_label = mask == clas
 
-            if true_label.long().sum().item() == 0: # Non existing labels in this loop
+            if true_label.long().sum().item() == 0:  # Non existing labels in this loop
                 dice_per_class.append(np.nan)
 
             else:
