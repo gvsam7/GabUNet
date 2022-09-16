@@ -3,7 +3,9 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from utilities.Data import WaterDataset, Dataset
+import os
+import pandas as pd
+from utilities.Data import Dataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from matplotlib import pyplot as plt
@@ -26,10 +28,6 @@ def load_checkpoint(checkpoint, model):
 
 
 def get_loaders(
-    # train_dir,
-    # train_maskdir,
-    # val_dir,
-    # val_maskdir,
     image_path,
     mask_path,
     X_train,
@@ -42,11 +40,6 @@ def get_loaders(
     num_workers=4,
     pin_memory=True,
 ):
-    """train_ds = WaterDataset(
-        image_dir=train_dir,
-        mask_dir=train_maskdir,
-        transform=train_transform,
-    )"""
 
     train_ds = Dataset(
         img_path=image_path,
@@ -63,11 +56,6 @@ def get_loaders(
         shuffle=True,
     )
 
-    """val_ds = WaterDataset(
-        image_dir=val_dir,
-        mask_dir=val_maskdir,
-        transform=val_transform,
-    )"""
     val_ds = Dataset(
         img_path=image_path,
         mask_path=mask_path,
@@ -98,7 +86,200 @@ def get_loaders(
         shuffle=False,
     )
 
-    return train_loader, val_loader, test_loader
+    return train_loader, val_loader, test_loader, test_ds
+
+
+def dataframe(image_path):
+    name = []
+    for dirname, _, filenames in os.walk(image_path):
+        for filename in filenames:
+            # name.append(filename.split('.')[0]  # for <name>.jpg images
+            name.append(filename.rsplit('.', 1)[0])  # for <name>.<name>.jpg images
+
+        return pd.DataFrame({'id': name}, index=np.arange(0, len(name)))
+
+
+def database(data):
+    if data == "landcover_ai":
+        image_path = "Data_test/train_images/"
+        mask_path = "Data_test/train_masks/"
+    else:
+        image_path = "Data/train_images/"
+        mask_path = "Data/train_masks/"
+    print(f"Dataset: {data}")
+    return image_path, mask_path
+
+
+def train(loader, model, optimizer, criterion, scaler, num_class, device):
+    loop = tqdm(loader)
+
+    for batch_idx, (data, targets) in enumerate(loop):
+        data = data.to(device=device)
+        if num_class == 1:
+            targets = targets.float().unsqueeze(1).to(device=device)
+        else:
+            targets = targets.long().to(device=device)
+
+        # forward
+        with torch.cuda.amp.autocast():
+            predictions = model(data)
+            loss = criterion(predictions, targets)
+
+        # backward
+        optimizer.zero_grad()
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
+
+        # update tqdm loop
+        loop.set_postfix(loss=loss.item())
+
+
+def plot(image, mask, pred_mask, score):
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 10))
+    ax1.imshow(image)
+    ax1.set_title('Image')
+    ax1.set_axis_off()
+    ax1.plot()
+
+    ax2.imshow(mask)
+    ax2.set_title('Mask')
+    ax2.set_axis_off()
+    ax2.plot()
+
+    ax3.imshow(pred_mask)
+    ax3.set_title('Predicted Mask | mIoU {:.3f}'.format(score))
+    ax3.set_axis_off()
+    ax3.plot()
+
+
+def jaccard(pred_mask, mask, smooth=1e-10, n_classes=5):
+    with torch.no_grad():
+        pred_mask = F.softmax(pred_mask, dim=1)
+        pred_mask = torch.argmax(pred_mask, dim=1)
+        pred_mask = pred_mask.contiguous().view(-1)
+        mask = mask.contiguous().view(-1)
+
+        iou_per_class = []
+        for clas in range(0, n_classes): #loop per pixel class
+            true_class = pred_mask == clas
+            true_label = mask == clas
+
+            if true_label.long().sum().item() == 0: #no exist label in this loop
+                iou_per_class.append(np.nan)
+            else:
+                intersect = torch.logical_and(true_class, true_label).sum().float().item()
+                union = torch.logical_or(true_class, true_label).sum().float().item()
+
+                iou = (intersect + smooth) / (union +smooth)
+                iou_per_class.append(iou)
+        return np.nanmean(iou_per_class)
+
+
+def predict_image_mask_miou(model, image, mask, device='cpu'):
+    model.eval()
+    model.to(device)
+    image = image.to(device)
+    mask = mask.to(device)
+    with torch.no_grad():
+        image = image.unsqueeze(0)
+        mask = mask.unsqueeze(0)
+
+        output = model(image)
+        score = jaccard(output, mask)
+        masked = torch.argmax(output, dim=1)
+        masked = masked.cpu().squeeze(0)
+    return masked, score
+
+
+def pixel_accuracy(preds, mask):
+    with torch.no_grad():
+        output = torch.argmax(F.softmax(preds, dim=1), dim=1)
+        correct = torch.eq(output, mask).int()
+        accuracy = float(correct.sum()) / float(correct.numel())
+    return accuracy
+
+
+def pixel_acc(model, test_set):
+    accuracy = []
+    for i in tqdm(range(len(test_set))):
+        img, mask = test_set[i]
+        pred_mask, acc = predict_image_mask_pixel(model, img, mask)
+        accuracy.append(acc)
+    return accuracy
+
+
+def predict_image_mask_pixel(model, image, mask, device='cpu'):
+    model.eval()
+    model.to(device)
+    image = image.to(device)
+    mask = mask.to(device)
+    with torch.no_grad():
+        image = image.unsqueeze(0)
+        mask = mask.unsqueeze(0)
+
+        preds = model(image)
+        acc = pixel_accuracy(preds, mask)
+        masked = torch.argmax(preds, dim=1)
+        masked = masked.cpu().squeeze(0)
+    return masked, acc
+
+
+def miou_score(model, test_set):
+    score_iou = []
+    for i in tqdm(range(len(test_set))):
+        img, mask = test_set[i]
+        pred_mask, score = predict_image_mask_miou(model, img, mask)
+        score_iou.append(score)
+    return score_iou
+
+
+def test_accuracy(loader, model, num_class, device="cuda"):
+    num_correct = 0
+    num_pixels = 0
+    dice_score = 0
+    # IoU = 0
+    med_jaccard = 0
+    jaccard = 0
+    dice = 0
+    model.eval()
+
+    with torch.no_grad():
+        for img, mask in loader:
+            img = img.to(device)
+            # mask = mask.to(device).unsqueeze(1)
+            if num_class == 1:
+                mask = mask.to(device).unsqueeze(1)
+                preds = torch.sigmoid(model(img))  # when binary 1-class semantic segmentation
+                preds = (preds > 0.5).float()  # 1 class semantic segmentation
+            else:
+                mask = mask.to(device)
+                softmax = nn.Softmax(dim=1)
+                preds = torch.argmax(softmax(model(img)), axis=1)
+                # preds = F.softmax((model(img)), dim=1)
+
+            num_correct += (preds == mask).sum()
+            num_pixels += torch.numel(preds)
+            dice_score += (2 * (preds * mask).sum()) / ((preds + mask).sum() + 1e-8)
+            # IoU += (preds * mask).sum() / ((preds + mask).sum() + 1e-8)
+
+            med_jaccard += mIoU(preds, mask, num_class)
+            dice += Dice(preds, mask, num_class)
+            jaccard += IoU(preds, mask, num_class)
+    # return med_jaccard, dice, jaccard, num_correct, num_pixels
+
+    print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
+    # print(f"Dice score: {dice_score/len(loader)}")
+    print(f"Test Dice score: {dice/len(loader)}")
+    print(f"Test IoU score: {jaccard/len(loader)}")
+    print(f"Test mIoU score: {med_jaccard/len(loader)}")
+    accuracy = num_correct/num_pixels*100
+    model.train()
+    # wandb.log({"Dice Score": dice_score/len(loader)})
+    wandb.log({"Test Dice Score": dice/len(loader)})
+    wandb.log({"Test IoU score": jaccard/len(loader)})
+    wandb.log({"Test Accuracy": accuracy})
+    wandb.log({"Test mIoU Score": med_jaccard/len(loader)})
 
 
 def check_accuracy(loader, model, num_class, device="cuda"):
@@ -133,6 +314,7 @@ def check_accuracy(loader, model, num_class, device="cuda"):
             med_jaccard += mIoU(preds, mask, num_class)
             dice += Dice(preds, mask, num_class)
             jaccard += IoU(preds, mask, num_class)
+    # return med_jaccard, dice, jaccard, num_correct, num_pixels
 
     print(f"Got {num_correct}/{num_pixels} pixels with accuracy: {num_correct/num_pixels*100:.2f}")
     # print(f"Dice score: {dice_score/len(loader)}")

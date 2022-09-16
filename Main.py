@@ -20,76 +20,30 @@ from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
-import wandb
 import os
-import pandas as pd
+import wandb
 from sklearn.model_selection import train_test_split
 from PIL import Image
 import matplotlib.pyplot as plt
 from utilities.Hyperparameters import arguments
 from utilities.Networks import networks
 from utilities.utils import (
+    train,
+    dataframe,
+    database,
+    plot,
     load_checkpoint,
     save_checkpoint,
     get_loaders,
+    predict_image_mask_miou,
+    miou_score,
+    pixel_acc,
+    test_accuracy,
     check_accuracy,
     save_predictions_as_imgs,
     save_table,
     num_parameters
 )
-
-# TRAIN_IMG_DIR = "Data_test/train_images/"
-# TRAIN_MASK_DIR = "Data_test/train_masks/"
-# VAL_IMG_DIR = "Data_test/val_images/"
-# VAL_MASK_DIR = "Data_test/val_masks/"
-# IMAGE_PATH = "Data_test/train_images/"
-# MASK_PATH = "Data_test/train_masks/"
-
-
-def dataframe(image_path):
-    name = []
-    for dirname, _, filenames in os.walk(image_path):
-        for filename in filenames:
-            # name.append(filename.split('.')[0]  # for <name>.jpg images
-            name.append(filename.rsplit('.', 1)[0])  # for <name>.<name>.jpg images
-
-        return pd.DataFrame({'id': name}, index=np.arange(0, len(name)))
-
-
-def database(data):
-    if data == "landcover_ai":
-        image_path = "Data_test/train_images/"
-        mask_path = "Data_test/train_masks/"
-    else:
-        image_path = "Data/train_images/"
-        mask_path = "Data/train_masks/"
-    print(f"Dataset: {data}")
-    return image_path, mask_path
-
-
-def train(loader, model, optimizer, criterion, scaler, num_class, device):
-    loop = tqdm(loader)
-
-    for batch_idx, (data, targets) in enumerate(loop):
-        data = data.to(device=device)
-        if num_class == 1:
-            targets = targets.float().unsqueeze(1).to(device=device)
-        else:
-            targets = targets.long().to(device=device)
-
-        # forward
-        with torch.cuda.amp.autocast():
-            predictions = model(data)
-            loss = criterion(predictions, targets)
-
-        # backward
-        optimizer.zero_grad()
-        scaler.scale(loss).backward()
-        scaler.step(optimizer)
-        scaler.update()
-
-        # update tqdm loop
-        loop.set_postfix(loss=loss.item())
 
 
 def main():
@@ -116,8 +70,6 @@ def main():
     print(f"Validation size: {len(X_val)}")
     print(f"Test size: {len(X_test)}")
 
-    # img = Image.open(IMAGE_PATH + df['id'][39] + '.JPG')
-    # mask = Image.open(MASK_PATH + df['id'][39] + '.PNG')
     img = Image.open(image_path + df['id'][39] + '.JPG')
     mask = Image.open(mask_path + df['id'][39] + '.PNG')
     print(f"Image size: {np.asarray(img).shape}")
@@ -126,7 +78,7 @@ def main():
     plt.imshow(img)
     plt.imshow(mask, alpha=0.6)
     plt.title('Image with Applied Masks')
-    plt.show()
+    # plt.show()
 
     train_transform = A.Compose(
         [
@@ -166,13 +118,7 @@ def main():
     print(f"criterion: {criterion}")
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    train_loader, val_loader, test_loader = get_loaders(
-        # TRAIN_IMG_DIR,
-        # TRAIN_MASK_DIR,
-        # VAL_IMG_DIR,
-        # VAL_MASK_DIR,
-        # IMAGE_PATH,
-        # MASK_PATH,
+    train_loader, val_loader, test_loader, test_ds = get_loaders(
         image_path,
         mask_path,
         X_train,
@@ -209,16 +155,42 @@ def main():
                 }
                 save_checkpoint(checkpoint)
 
-        train(val_loader, model, optimizer, criterion, scaler, args.num_class, device)
-
         # check accuracy
-        check_accuracy(test_loader, model, device=device, num_class=args.num_class)
+        check_accuracy(val_loader, model, device=device, num_class=args.num_class)
 
         # print some examples to a folder
-        save_predictions_as_imgs(val_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
-        wandb.save(os.path.join('saved_images', '*'))
+        # save_predictions_as_imgs(val_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
+        # wandb.save(os.path.join('saved_images', '*'))
 
-        save_table(val_loader, args.num_class, model,  "Predictions", device)
+        # save_table(val_loader, args.num_class, model,  "Predictions", device)
+
+    ################################################ Test #############################################################
+    print("Testing Data...")
+    test_accuracy(test_loader, model, device=device, num_class=args.num_class)
+
+    # print some examples to a folder
+    save_predictions_as_imgs(test_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
+    wandb.save(os.path.join('saved_images', '*'))
+
+    save_table(test_loader, args.num_class, model,  "Predictions", device)
+    test_set = test_ds
+
+    mob_miou = miou_score(model, test_set)
+
+    mob_acc = pixel_acc(model, test_set)
+
+    i = 0
+    for i in tqdm(range(len(test_set))):
+        test_set = test_ds
+        image, mask = test_set[i]
+        pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)
+        plot(image.permute(1, 2, 0).detach().cpu()[:, :, 0], mask, pred_mask, score)
+        plt.savefig('saved_images/prediction' + str(i) + '.jpg')
+        i += 1
+
+    print('Test Set mIoU', np.mean(mob_miou))
+
+    print('Test Set Pixel Accuracy', np.mean(mob_acc))
 
 
 if __name__ == "__main__":
