@@ -181,12 +181,13 @@ def main():
 
     i = 0
     for i in tqdm(range(len(test_set))):
-        test_set = test_ds
-        image, mask = test_set[i]
-        pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)
-        plot(image.permute(1, 2, 0).detach().cpu()[:, :, 0], mask, pred_mask, score)
-        plt.savefig('saved_images/prediction' + str(i) + '.jpg')
-        i += 1
+        if i % 100 == 0:
+            test_set = test_ds
+            image, mask = test_set[i]
+            pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)
+            plot(image.permute(1, 2, 0).detach().cpu()[:, :, 0], mask, pred_mask, score)
+            plt.savefig('saved_images/prediction' + str(i) + '.jpg')
+            i += 1
 
     print('Test Set mIoU', np.mean(mob_miou))
 

@@ -101,8 +101,8 @@ def dataframe(image_path):
 
 def database(data):
     if data == "landcover_ai":
-        image_path = "Data_test/train_images/"
-        mask_path = "Data_test/train_masks/"
+        image_path = "Data_LandcoverAI/train_images/"
+        mask_path = "Data_LandcoverAI/train_masks/"
     else:
         image_path = "Data/train_images/"
         mask_path = "Data/train_masks/"
