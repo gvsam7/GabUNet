@@ -176,7 +176,7 @@ def jaccard(pred_mask, mask, smooth=1e-10, n_classes=5):
         return np.nanmean(iou_per_class)
 
 
-def predict_image_mask_miou(model, image, mask, device='cpu'):
+def predict_image_mask_miou(model, image, mask, device='cuda'):
     model.eval()
     model.to(device)
     image = image.to(device)
@@ -209,7 +209,7 @@ def pixel_acc(model, test_set):
     return accuracy
 
 
-def predict_image_mask_pixel(model, image, mask, device='cpu'):
+def predict_image_mask_pixel(model, image, mask, device='cuda'):
     model.eval()
     model.to(device)
     image = image.to(device)
