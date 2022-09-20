@@ -180,7 +180,7 @@ def main():
     mob_acc = pixel_acc(model, test_set)
 
     i = 0
-    for i in tqdm(range(len(test_set)))[:5]:
+    for i in tqdm(range(len(test_set))):
         test_set = test_ds
         image, mask = test_set[i]
         pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)
