@@ -187,7 +187,6 @@ def main():
         plot(image.permute(1, 2, 0).detach().cpu()[:, :, 0], mask, pred_mask, score)
         plt.savefig('saved_images/prediction' + str(i) + '.jpg')
         # wandb.save(os.path.join('saved_images', '*'))
-        # plt.close(plt)
         i += 100
 
     print('Test Set mIoU', np.mean(mob_miou))
