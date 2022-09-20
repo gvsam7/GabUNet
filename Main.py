@@ -70,8 +70,8 @@ def main():
     print(f"Validation size: {len(X_val)}")
     print(f"Test size: {len(X_test)}")
 
-    img = Image.open(image_path + df['id'][39] + '.JPG')
-    mask = Image.open(mask_path + df['id'][39] + '.PNG')
+    img = Image.open(image_path + df['id'][39] + '.jpg')
+    mask = Image.open(mask_path + df['id'][39] + '.png')
     print(f"Image size: {np.asarray(img).shape}")
     print(f"Mask size: {np.asarray(mask).shape}")
 
