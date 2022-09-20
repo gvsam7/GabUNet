@@ -169,8 +169,8 @@ def main():
     test_accuracy(test_loader, model, device=device, num_class=args.num_class)
 
     # print some examples to a folder
-    save_predictions_as_imgs(test_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
-    wandb.save(os.path.join('saved_images', '*'))
+    # save_predictions_as_imgs(test_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
+    # wandb.save(os.path.join('saved_images', '*'))
 
     save_table(test_loader, args.num_class, model,  "Predictions", device)
     test_set = test_ds
@@ -186,6 +186,7 @@ def main():
         pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)
         plot(image.permute(1, 2, 0).detach().cpu()[:, :, 0], mask, pred_mask, score)
         plt.savefig('saved_images/prediction' + str(i) + '.jpg')
+        wandb.save(os.path.join('saved_images', '*'))
         i += 100
 
     print('Test Set mIoU', np.mean(mob_miou))
