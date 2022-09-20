@@ -170,7 +170,7 @@ def main():
 
     # print some examples to a folder
     # save_predictions_as_imgs(test_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
-    wandb.save(os.path.join('saved_images', '*'))
+    # wandb.save(os.path.join('saved_images', '*'))
 
     save_table(test_loader, args.num_class, model,  "Predictions", device)
     test_set = test_ds
@@ -180,13 +180,13 @@ def main():
     mob_acc = pixel_acc(model, test_set)
 
     i = 0
-    for i in tqdm(range(len(test_set))):
+    for i[0:5] in tqdm(range(len(test_set))):
         test_set = test_ds
         image, mask = test_set[i]
         pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)
         plot(image.permute(1, 2, 0).detach().cpu()[:, :, 0], mask, pred_mask, score)
         plt.savefig('saved_images/prediction' + str(i) + '.jpg')
-        # wandb.save(os.path.join('saved_images', '*'))
+        wandb.save(os.path.join('saved_images', '*'))
         i += 100
 
     print('Test Set mIoU', np.mean(mob_miou))
