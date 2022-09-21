@@ -180,14 +180,18 @@ def main():
     mob_acc = pixel_acc(model, test_set)
 
     i = 0
-    for i in tqdm(range(len(test_set))):
-        test_set = test_ds
-        image, mask = test_set[i]
-        pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)
-        plot(image.permute(1, 2, 0).detach().cpu()[:, :, 0], mask, pred_mask, score)
-        plt.savefig('saved_images/prediction' + str(i) + '.jpg')
-        wandb.save(os.path.join('saved_images', '*'))
-        i += 100
+    # for i in tqdm(range(len(test_set))):
+    # for i in range(len(X_test[:2])):
+    for i in range(len(X_test)):
+        if i % 100 == 0:
+            test_set = test_ds
+            image, mask = test_set[i]
+            pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)
+            plot(image.permute(1, 2, 0).detach().cpu()[:, :, 0], mask, pred_mask, score)
+            plt.savefig('saved_images/prediction_test' + str(i) + '.jpg')
+            # wandb.save(os.path.join('saved_images', '*'))
+        else:
+            i += 1
 
     print('Test Set mIoU', np.mean(mob_miou))
 
