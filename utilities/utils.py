@@ -137,7 +137,12 @@ def train(loader, model, optimizer, criterion, scaler, num_class, device):
 
 def plot(image, mask, pred_mask, score):
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 10))
-    ax1.imshow(image)
+    # Denormalise images so they will not be dark
+    mean = torch.tensor([0.0, 0.0, 0.0])
+    std = torch.tensor([1.0, 1.0, 1.0])
+    image = image * std[:, None, None] + mean[:, None, None]
+
+    ax1.imshow(image.permute(1, 2, 0))
     ax1.set_title('Image')
     ax1.set_axis_off()
     ax1.plot()
@@ -430,9 +435,14 @@ def save_table(loader, num_class, model, table_name, device):
             softmax = nn.Softmax(dim=1)
             _mask = torch.argmax(softmax(model(im)), axis=1)
 
+        mean = torch.tensor([0.0, 0.0, 0.0])
+        std = torch.tensor([1.0, 1.0, 1.0])
+        im = im * std[:, None, None] + mean[:, None, None]
+
         plt.figure(figsize=(10, 10))
         plt.axis("off")
-        plt.imshow(im[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
+        # plt.imshow(im[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
+        plt.imshow(im[0].permute(1, 2, 0))
         plt.savefig("original_image.jpg")
         plt.close()
 
