@@ -438,6 +438,8 @@ def save_table(loader, num_class, model, table_name, device):
 
         mean = torch.tensor([0.0, 0.0, 0.0])
         std = torch.tensor([1.0, 1.0, 1.0])
+        mean = mean.to(device=device)
+        std = std.to(device=device)
         im = im * std[:, None, None] + mean[:, None, None]
 
         plt.figure(figsize=(10, 10))
