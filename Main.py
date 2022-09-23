@@ -25,6 +25,7 @@ import wandb
 from sklearn.model_selection import train_test_split
 from PIL import Image
 import matplotlib.pyplot as plt
+import time
 from utilities.Hyperparameters import arguments
 from utilities.Networks import networks
 from utilities.utils import (
@@ -132,7 +133,7 @@ def main():
         args.pin_memory,
     )
 
-    # Load model
+    # Load saved model
     if args.load_model == 'True':
         print(f"Load model is {args.load_model}")
         if device == torch.device("cpu"):
@@ -143,7 +144,9 @@ def main():
     check_accuracy(val_loader, model, device=device, num_class=args.num_class)
     scaler = torch.cuda.amp.GradScaler()
 
+    ############################################# Train ###############################################################
     for epoch in range(args.epochs):
+        since = time.time()
         train(train_loader, model, optimizer, criterion, scaler, args.num_class, device)
 
         # Saving model
@@ -157,6 +160,8 @@ def main():
 
         # check accuracy
         check_accuracy(val_loader, model, device=device, num_class=args.num_class)
+        print("Epoch:{}/{}..".format(epoch + 1, args.epochs),
+              "Time: {:.2f}m".format((time.time() - since) / 60))
 
         # print some examples to a folder
         # save_predictions_as_imgs(val_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
