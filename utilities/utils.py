@@ -438,14 +438,12 @@ def save_table(loader, num_class, model, table_name, device):
 
         mean = torch.tensor([0.0, 0.0, 0.0])
         std = torch.tensor([1.0, 1.0, 1.0])
-        mean = mean.to(device=device)
-        std = std.to(device=device)
         im = im * std[:, None, None] + mean[:, None, None]
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
         # plt.imshow(im[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
-        plt.imshow(im[0].permute(1, 2, 0))
+        plt.imshow(im[0].permute(1, 2, 0).cpu())
         plt.savefig("original_image.jpg")
         plt.close()
 
