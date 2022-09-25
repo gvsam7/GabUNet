@@ -105,8 +105,8 @@ def database(data):
         image_path = "Data_LandcoverAI/train_images/"
         mask_path = "Data_LandcoverAI/train_masks/"
     else:
-        image_path = "Data/train_images/"
-        mask_path = "Data/train_masks/"
+        image_path = "Data_Water/train_images/"
+        mask_path = "Data_Water/train_masks/"
     print(f"Dataset: {data}")
     return image_path, mask_path
 
