@@ -203,6 +203,8 @@ def main():
 
     print('Test Set Pixel Accuracy', np.mean(mob_acc))
 
+    wandb.save('my_checkpoint.pth.tar')
+
 
 if __name__ == "__main__":
     main()
