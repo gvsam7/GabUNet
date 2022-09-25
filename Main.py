@@ -188,7 +188,7 @@ def main():
     # for i in tqdm(range(len(test_set))):
     # for i in range(len(X_test[:2])):
     for i in range(len(X_test)):
-        if i % 100 == 0:
+        if i % args.saved_images == 0:
             test_set = test_ds
             image, mask = test_set[i]
             pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)

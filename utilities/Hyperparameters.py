@@ -11,6 +11,7 @@ def arguments():
     parser.add_argument("--in-channels", type=int, default=3)
     parser.add_argument("--num-class", type=int, default=1)
     parser.add_argument("--data", default='landcover_ai', help='water, landcover_ai')
+    parser.add_argument("--saved-images", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--height", type=int, default=160)
