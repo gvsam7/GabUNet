@@ -107,6 +107,9 @@ def database(data):
     elif data == "WHDLD":
         image_path = "Data_WHDLD/train_images/"
         mask_path = "Data_WHDLD/train_masks/"
+    elif data == 'uavid':
+        image_path = "Data_UAVid/train_images/"
+        mask_path = "Data_UAVid/train_masks/"
     else:
         image_path = "Data_Water/train_images/"
         mask_path = "Data_Water/train_masks/"
@@ -162,7 +165,7 @@ def plot(image, mask, pred_mask, score):
     ax3.plot()
 
 
-def jaccard(pred_mask, mask, smooth=1e-10, n_classes=255):
+def jaccard(pred_mask, mask, smooth=1e-10, n_classes=8):
     with torch.no_grad():
         pred_mask = F.softmax(pred_mask, dim=1)
         pred_mask = torch.argmax(pred_mask, dim=1)
