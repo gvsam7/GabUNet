@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 from models.GaborLayer import GaborConv2d
 
 
@@ -92,3 +93,61 @@ class GACBlock(nn.Module):
         x2 = self.cross_ver(x)
         x3 = self.cross_hor(x)
         return self.relu(self.bn(x1 + x2 + x3))
+
+"""
+class DilACBlock(nn.Module):
+    def __init__(self, in_planes, out_planes):
+        super(DilACBlock, self).__init__()
+        self.square = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1, dilation=3)
+        self.cross_ver = nn.Conv2d(in_planes, out_planes, kernel_size=(1, 3), padding='same', stride=1, dilation=3)
+        self.cross_hor = nn.Conv2d(in_planes, out_planes, kernel_size=(3, 1), padding='same', stride=1, dilation=3)
+        self.bn = nn.BatchNorm2d(out_planes)
+        self.relu = nn.ReLU(True)
+
+    def forward(self, x):
+        x1 = self.square(x)
+        print(f"x1 shape: {x1.shape}")
+        x2 = self.cross_ver(x)
+        print(f"x2 shape: {x2.shape}")
+        x3 = self.cross_hor(x)
+        print(f"x3 shape: {x3.shape}")
+        return self.relu(self.bn(x1 + x2 + x3))
+
+"""
+class DilACBlock(nn.Module):
+    def __init__(self, in_planes, out_planes):
+        super(DilACBlock, self).__init__()
+        self.square1 = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1)
+        self.cross_ver1 = nn.Conv2d(in_planes, out_planes, kernel_size=(1, 3), padding='same', stride=1)
+        self.cross_hor1 = nn.Conv2d(in_planes, out_planes, kernel_size=(3, 1), padding='same', stride=1)
+        self.square3 = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1, dilation=2)
+        self.cross_ver3 = nn.Conv2d(in_planes, out_planes, kernel_size=(1, 3), padding='same', stride=1, dilation=2)
+        self.cross_hor3 = nn.Conv2d(in_planes, out_planes, kernel_size=(3, 1), padding='same', stride=1, dilation=2)
+        self.square6 = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1, dilation=6)
+        self.cross_ver6 = nn.Conv2d(in_planes, out_planes, kernel_size=(1, 3), padding='same', stride=1, dilation=6)
+        self.cross_hor6 = nn.Conv2d(in_planes, out_planes, kernel_size=(3, 1), padding='same', stride=1, dilation=6)
+        self.square9 = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1, dilation=9)
+        self.cross_ver9 = nn.Conv2d(in_planes, out_planes, kernel_size=(1, 3), padding='same', stride=1, dilation=9)
+        self.cross_hor9 = nn.Conv2d(in_planes, out_planes, kernel_size=(3, 1), padding='same', stride=1, dilation=9)
+        self.bn = nn.BatchNorm2d(out_planes)
+        self.relu = nn.ReLU(True)
+
+    def forward(self, x):
+        x11 = self.square1(x)
+        x12 = self.cross_ver1(x)
+        x13 = self.cross_hor1(x)
+        x1 = x11 + x12 + x13
+        x31 = self.square3(x)
+        x32 = self.cross_ver3(x)
+        x33 = self.cross_hor3(x)
+        x3 = x31 + x32 + x33
+        x61 = self.square6(x)
+        x62 = self.cross_ver6(x)
+        x63 = self.cross_hor6(x)
+        x6 = x61 + x62 + x63
+        x91 = self.square9(x)
+        x92 = self.cross_ver9(x)
+        x93 = self.cross_hor9(x)
+        x9 = x91 + x92 + x93
+        x = x1 + (x3 + x6 + x9)/3
+        return self.relu(self.bn(x))
