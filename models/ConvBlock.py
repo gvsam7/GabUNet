@@ -23,8 +23,8 @@ class DilConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DilConvBlock, self).__init__()
         self.conv = nn.Sequential(
-            ACBlock(in_channels, out_channels, 3, 1, 1, bias=False),
-            ACBlock(out_channels, out_channels, 3, 1, 1, bias=False),
+            ACBlock(in_channels, out_channels, 3, 1, 1),
+            ACBlock(out_channels, out_channels, 3, 1, 1),
         )
 
     def forward(self, x):
