@@ -63,10 +63,18 @@ class DilMixPGMAC_UNet(nn.Module):
             ACBlock(channels[3], channels[3])
         )
 
-        self.conv5 = nn.Sequential(
+        """self.conv5 = nn.Sequential(
             MixPool(kernel_size=(2, 2), stride=(2, 2), padding=0, alpha=0.2),
             DilACBlock(channels[3], channels[4]),
             DilACBlock(channels[4], channels[4]),
+            DilACBlock(channels[4], channels[4])
+        )"""
+
+        self.conv5 = nn.Sequential(
+            MixPool(kernel_size=(2, 2), stride=(2, 2), padding=0, alpha=0.2),
+            ACBlock(channels[3], channels[4]),
+            ACBlock(channels[4], channels[4]),
+            ACBlock(channels[4], channels[4]),
             DilACBlock(channels[4], channels[4])
         )
 
