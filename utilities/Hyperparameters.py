@@ -21,6 +21,6 @@ def arguments():
     parser.add_argument("--pretrained", default=True)
     parser.add_argument("--architecture", default='unet', help='unet=UNet, gunet=G_UNet, mac_unet=MAC_UNet, '
                                                                'gmac_unet=GMAC_UNet, mixpgmac_unet=MixPGMAC_UNet,'
-                                                               'dilmixpgmac_unet=DilMixPGMAC_UNet')
+                                                               'asymunet=AsymUNet, dilmixpgmac_unet=DilMixPGMAC_UNet')
 
     return parser.parse_args()

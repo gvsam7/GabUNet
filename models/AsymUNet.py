@@ -4,9 +4,9 @@ import torchvision.transforms.functional as TF
 from models.ConvBlock import ACBlock
 
 
-class UNet(nn.Module):
+class AsymUNet(nn.Module):
     def __init__(self, in_channels, num_class, features=[32, 64, 128, 256, 512]):
-        super(UNet, self).__init__()
+        super(AsymUNet, self).__init__()
         self.ups = nn.ModuleList()
         self.downs = nn.ModuleList()
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)

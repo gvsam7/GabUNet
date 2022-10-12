@@ -6,6 +6,7 @@ from models.MAC_UNet import MAC_UNet
 from models.GMAC_UNet import GMAC_UNet
 from models.MixPGMAC_UNet import MixPGMAC_UNet
 from models.DilMixPGMAC_UNet import DilMixPGMAC_UNet
+from models.AsymUNet import AsymUNet
 
 
 def networks(architecture, in_channels, num_class):
@@ -19,6 +20,8 @@ def networks(architecture, in_channels, num_class):
         model = MixPGMAC_UNet(in_channels, num_class)
     elif architecture == 'dilmixpgmac_unet':
         model = DilMixPGMAC_UNet(in_channels, num_class)
+    elif architecture == 'asymunet':
+        model = AsymUNet(in_channels, num_class)
     else:
         model = G_UNet(in_channels, num_class)
     return model
