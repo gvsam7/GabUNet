@@ -22,13 +22,27 @@ class ConvBlock(nn.Module):
 class DilConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DilConvBlock, self).__init__()
-        self.conv = nn.Sequential(
-            ACBlock(in_channels, out_channels, 3, 1, 1),
-            ACBlock(out_channels, out_channels, 3, 1, 1),
-        )
+        self.square1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=1, bias=False)
+        self.cross_ver1 = nn.Conv2d(in_channels, out_channels, kernel_size=(1, 3), padding=(0, 1), stride=1, bias=False)
+        self.cross_hor1 = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 1), padding=(1, 0), stride=1, bias=False)
+        self.bn = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(True)
+        self.square2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, stride=1, bias=False)
+        self.cross_ver2 = nn.Conv2d(out_channels, out_channels, kernel_size=(1, 3), padding=(0, 1), stride=1, bias=False)
+        self.cross_hor2 = nn.Conv2d(out_channels, out_channels, kernel_size=(3, 1), padding=(1, 0), stride=1, bias=False)
+        self.bn = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(True)
 
     def forward(self, x):
-        return self.conv(x)
+        x1 = self.square1(x)
+        x2 = self.cross_ver1(x)
+        x3 = self.cross_hor1(x)
+        x = self.relu(self.bn(x1 + x2 + x3))
+        x4 = self.square1(x)
+        x5 = self.cross_ver1(x)
+        x6 = self.cross_hor1(x)
+        x = self.relu(self.bn(x4 + x5 + x6))
+        return x
 
 
 class GConvBlock(nn.Module):
@@ -78,9 +92,9 @@ class ChannelAttention(nn.Module):
 class ACBlock(nn.Module):
     def __init__(self, in_planes, out_planes):
         super(ACBlock, self).__init__()
-        self.square = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding=1, stride=1, bias=False)
-        self.cross_ver = nn.Conv2d(in_planes, out_planes, kernel_size=(1, 3), padding=(0, 1), stride=1, bias=False)
-        self.cross_hor = nn.Conv2d(in_planes, out_planes, kernel_size=(3, 1), padding=(1, 0), stride=1, bias=False)
+        self.square = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding=1, stride=1)
+        self.cross_ver = nn.Conv2d(in_planes, out_planes, kernel_size=(1, 3), padding=(0, 1), stride=1)
+        self.cross_hor = nn.Conv2d(in_planes, out_planes, kernel_size=(3, 1), padding=(1, 0), stride=1)
         self.bn = nn.BatchNorm2d(out_planes)
         self.relu = nn.ReLU(True)
 
