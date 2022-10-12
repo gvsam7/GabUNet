@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision.transforms.functional as TF
-from models.ConvBlock import ACBlock
+from models.ConvBlock import DilConvBlock, DACBlock
 
 
 class AsymUNet(nn.Module):
@@ -13,7 +13,7 @@ class AsymUNet(nn.Module):
 
         # Down part of UNET
         for feature in features:
-            self.downs.append(ACBlock(in_channels, feature))
+            self.downs.append(DilConvBlock(in_channels, feature))
             in_channels = feature
 
         # Up part of UNET
@@ -23,9 +23,9 @@ class AsymUNet(nn.Module):
                     feature * 2, feature, kernel_size=2, stride=2,
                 )
             )
-            self.ups.append(ACBlock(feature * 2, feature))
+            self.ups.append(DilConvBlock(feature * 2, feature))
 
-        self.bottleneck = ACBlock(features[-1], features[-1] * 2)
+        self.bottleneck = DilConvBlock(features[-1], features[-1] * 2)
         self.final_conv = nn.Conv2d(features[0], num_class, kernel_size=1)
 
     def forward(self, x):

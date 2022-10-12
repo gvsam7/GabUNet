@@ -19,6 +19,18 @@ class ConvBlock(nn.Module):
         return self.conv(x)
 
 
+class DilConvBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(DilConvBlock, self).__init__()
+        self.conv = nn.Sequential(
+            ACBlock(in_channels, out_channels, 3, 1, 1, bias=False),
+            ACBlock(out_channels, out_channels, 3, 1, 1, bias=False),
+        )
+
+    def forward(self, x):
+        return self.conv(x)
+
+
 class GConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(GConvBlock, self).__init__()
@@ -94,26 +106,54 @@ class GACBlock(nn.Module):
         x3 = self.cross_hor(x)
         return self.relu(self.bn(x1 + x2 + x3))
 
-"""
-class DilACBlock(nn.Module):
+
+class DACBlock(nn.Module):
     def __init__(self, in_planes, out_planes):
-        super(DilACBlock, self).__init__()
-        self.square = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1, dilation=3)
-        self.cross_ver = nn.Conv2d(in_planes, out_planes, kernel_size=(1, 3), padding='same', stride=1, dilation=3)
-        self.cross_hor = nn.Conv2d(in_planes, out_planes, kernel_size=(3, 1), padding='same', stride=1, dilation=3)
+        super(DACBlock, self).__init__()
+        self.conv1 = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1, dilation=1)
+        self.conv3 = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1, dilation=3)
+        self.conv6 = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1, dilation=6)
+        self.conv9 = nn.Conv2d(in_planes, out_planes, kernel_size=3, padding='same', stride=1, dilation=9)
         self.bn = nn.BatchNorm2d(out_planes)
         self.relu = nn.ReLU(True)
 
     def forward(self, x):
-        x1 = self.square(x)
-        print(f"x1 shape: {x1.shape}")
-        x2 = self.cross_ver(x)
-        print(f"x2 shape: {x2.shape}")
-        x3 = self.cross_hor(x)
-        print(f"x3 shape: {x3.shape}")
-        return self.relu(self.bn(x1 + x2 + x3))
+        x1 = self.conv1(x)
+        x3 = self.conv3(x)
+        x6 = self.conv6(x)
+        x9 = self.conv9(x)
+        x_t = x1 + (x3 + x6 + x9)/3
+        return self.relu(self.bn(x_t))
 
-"""
+
+class DilChannelAttention(nn.Module):
+    def __init__(self, in_planes, out_planes, ratio=2):
+        super(DilChannelAttention, self).__init__()
+        self.conv = DilACBlock(in_planes, out_planes, 1, bias=False)
+        self.avg_out = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Conv2d(out_planes, out_planes // ratio, 1, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_planes // ratio, out_planes, 1, bias=False),
+
+        )
+        self.max_out = nn.Sequential(
+            nn.AdaptiveMaxPool2d(1),
+            nn.Conv2d(out_planes, out_planes // ratio, 1, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_planes // ratio, out_planes, 1, bias=False)
+        )
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.conv(x)
+        avg_out = self.avg_out(x)
+        max_out = self.max_out(x)
+        out = avg_out + max_out
+        del avg_out, max_out
+        return x * self.sigmoid(out)
+
+
 class DilACBlock(nn.Module):
     def __init__(self, in_planes, out_planes):
         super(DilACBlock, self).__init__()
