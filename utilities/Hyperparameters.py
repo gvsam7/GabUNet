@@ -19,6 +19,7 @@ def arguments():
     parser.add_argument("--save-model", default=True)
     parser.add_argument("--load-model", default=False)
     parser.add_argument("--pretrained", default=True)
+    parser.add_argument("--random-state", type=int, default=21)
     parser.add_argument("--architecture", default='unet', help='unet=UNet, gunet=G_UNet, mac_unet=MAC_UNet, '
                                                                'gmac_unet=GMAC_UNet, mixpgmac_unet=MixPGMAC_UNet,'
                                                                'asymunet=AsymUNet, dilmixpgmac_unet=DilMixPGMAC_UNet')

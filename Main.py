@@ -64,12 +64,13 @@ def main():
     print(f'Total Images: {len(df)}')
 
     # Data split
-    X_trainval, X_test = train_test_split(df['id'].values, test_size=0.1, random_state=21)
-    X_train, X_val = train_test_split(X_trainval, test_size=0.15, random_state=21)
+    X_trainval, X_test = train_test_split(df['id'].values, test_size=0.1, random_state=args.random_state)
+    X_train, X_val = train_test_split(X_trainval, test_size=0.15, random_state=args.random_state)
 
     print(f"Train size: {len(X_train)}")
     print(f"Validation size: {len(X_val)}")
     print(f"Test size: {len(X_test)}")
+    print(f"Random State: {args.random_state}")
 
     img = Image.open(image_path + df['id'][39] + '.jpg')
     mask = Image.open(mask_path + df['id'][39] + '.png')
