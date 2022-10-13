@@ -31,6 +31,18 @@ class DilConvBlock(nn.Module):
         return x
 
 
+class DilBottleneck(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(DilBottleneck, self).__init__()
+        self.conv1 = DilACBlock(in_channels, out_channels)
+        self.conv2 = DilACBlock(out_channels, out_channels)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        return x
+
+
 class GConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(GConvBlock, self).__init__()
