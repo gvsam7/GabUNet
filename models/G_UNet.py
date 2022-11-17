@@ -20,7 +20,7 @@ class G_UNet(nn.Module):
             elif feature == features[-1]:
                 self.downs.append(DilConvBlock(in_channels, feature))
             else:
-                self.downs.append(ConvBlock(in_channels, feature))
+                self.downs.append(ConvBlock1(in_channels, feature))
             in_channels = feature
 
         # Up part of UNET
