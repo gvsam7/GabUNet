@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision.transforms.functional as TF
-from models.ConvBlock import GConvBlock, ConvBlock, DilConvBlock
+from models.ConvBlock import GConvBlock, ConvBlock, DilConvBlock, ConvBlock1
 
 
 class G_UNet(nn.Module):
@@ -30,9 +30,9 @@ class G_UNet(nn.Module):
                     feature * 2, feature, kernel_size=2, stride=2,
                 )
             )
-            self.ups.append(ConvBlock(feature * 2, feature))
+            self.ups.append(ConvBlock1(feature * 2, feature))
 
-        self.bottleneck = ConvBlock(features[-1], features[-1] * 2)
+        self.bottleneck = ConvBlock1(features[-1], features[-1] * 2)
         self.final_conv = nn.Conv2d(features[0], num_class, kernel_size=1)
 
     def forward(self, x):
