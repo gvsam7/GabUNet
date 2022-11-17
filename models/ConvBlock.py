@@ -13,6 +13,7 @@ class ConvBlock(nn.Module):
             nn.Conv2d(out_channels, out_channels, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
+            # nn.MaxPool2d(kernel_size=2, stride=2) # Added MaxPool to the original
         )
 
     def forward(self, x):
@@ -22,12 +23,19 @@ class ConvBlock(nn.Module):
 class DilConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DilConvBlock, self).__init__()
-        self.conv1 = ACBlock(in_channels, out_channels)
-        self.conv2 = ACBlock(out_channels, out_channels)
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 3, 1, 1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_channels, out_channels, 3, 1, 1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
+            DACBlock(out_channels, out_channels)
+            # nn.MaxPool2d(kernel_size=2, stride=2) # Added MaxPool to the original
+        )
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
+        x = self.conv(x)
         return x
 
 
