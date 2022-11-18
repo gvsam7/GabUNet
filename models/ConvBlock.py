@@ -13,13 +13,13 @@ class ConvBlock(nn.Module):
             nn.Conv2d(out_channels, out_channels, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2)  # Added MaxPool to the original
         )
 
     def forward(self, x):
         return self.conv(x)
 
-# No Max pooling
+
+# Max pooling
 class ConvBlock1(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(ConvBlock1, self).__init__()
@@ -30,6 +30,7 @@ class ConvBlock1(nn.Module):
             nn.Conv2d(out_channels, out_channels, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2)  # Added MaxPool to the original
         )
 
     def forward(self, x):
