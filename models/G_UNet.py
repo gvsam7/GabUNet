@@ -17,8 +17,8 @@ class G_UNet(nn.Module):
             if feature == features[0]:
                 self.downs.append(GConvBlock(in_channels, feature))
             # Added dilated last conv layer
-            # elif feature == features[-1]:
-                # self.downs.append(DilConvBlock(in_channels, feature))
+            elif feature == features[-1]:
+                self.downs.append(DilConvBlock(in_channels, feature))
             else:
                 self.downs.append(ConvBlock(in_channels, feature))
             in_channels = feature
@@ -32,7 +32,7 @@ class G_UNet(nn.Module):
             )
             self.ups.append(ConvBlock(feature * 2, feature))
 
-        self.bottleneck = DilConvBlock(features[-1], features[-1] * 2)
+        self.bottleneck = ConvBlock(features[-1], features[-1] * 2)
         self.final_conv = nn.Conv2d(features[0], num_class, kernel_size=1)
 
     def forward(self, x):
