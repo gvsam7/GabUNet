@@ -9,8 +9,8 @@ class G_UNet(nn.Module):
         super(G_UNet, self).__init__()
         self.ups = nn.ModuleList()
         self.downs = nn.ModuleList()
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        # self.pool = nn.AdaptiveAvgPool2d(output_size=(7, 7))
+        # self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.pool = nn.AdaptiveAvgPool2d(output_size=(7, 7))
 
         # Down part of UNET
         for feature in features:
@@ -20,7 +20,7 @@ class G_UNet(nn.Module):
             elif feature == features[-1]:
                 self.downs.append(DilConvBlock(in_channels, feature))
             else:
-                self.downs.append(ConvBlock1(in_channels, feature))
+                self.downs.append(ConvBlock(in_channels, feature))
             in_channels = feature
 
         # Up part of UNET
