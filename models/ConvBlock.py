@@ -48,7 +48,7 @@ class ResBlockMP(nn.Module):
         # Convolutional layer
         self.bn1 = BatchNormReLU(in_channels)
         self.conv1 = nn.Sequential(
-                nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, stride=1),
+                nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=1),
                 MixPool(2, 2, 0, 0.8)
             )
         self.bn2 = BatchNormReLU(out_channels)
@@ -56,7 +56,7 @@ class ResBlockMP(nn.Module):
 
         # Shortcut Connection (Identity Mapping)
         self.skip = nn.Sequential(
-                nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=stride),
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=1),
                 MixPool(2, 2, 0, 0.8)
             )
 
