@@ -8,6 +8,7 @@ from models.MixPGMAC_UNet import MixPGMAC_UNet
 from models.DilMixPGMAC_UNet import DilMixPGMAC_UNet
 from models.AsymUNet import AsymUNet
 from models.ResUNet import ResUNet
+from models.GabMPResUNet import GabMPResUNet
 
 
 def networks(architecture, in_channels, num_class):
@@ -25,6 +26,8 @@ def networks(architecture, in_channels, num_class):
         model = AsymUNet(in_channels, num_class)
     elif architecture == 'resunet':
         model = ResUNet(in_channels, num_class)
+    elif architecture =='gabmpresunet':
+        model = GabMPResUNet(in_channels, num_class)
     else:
         model = G_UNet(in_channels, num_class)
     return model

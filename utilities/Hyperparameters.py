@@ -23,6 +23,6 @@ def arguments():
     parser.add_argument("--architecture", default='unet', help='unet=UNet, gunet=G_UNet, mac_unet=MAC_UNet, '
                                                                'gmac_unet=GMAC_UNet, mixpgmac_unet=MixPGMAC_UNet,'
                                                                'asymunet=AsymUNet, dilmixpgmac_unet=DilMixPGMAC_UNet,'
-                                                               'resunet=ResUNet')
+                                                               'resunet=ResUNet, gabmpresunet=GabMPResUNet')
 
     return parser.parse_args()
