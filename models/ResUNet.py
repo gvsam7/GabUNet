@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from models.ConvBlock import BatchNormReLU, ResBlock, Decoder
+from models.ConvBlock import BatchNormReLU, ResBlock, Decoder, GaborConv2d
 
 
 class ResUNet(nn.Module):
@@ -9,7 +9,8 @@ class ResUNet(nn.Module):
         self.num_class = num_class
 
         # Encoder 1
-        self.conv11 = nn.Conv2d(in_channels, 64, kernel_size=3, padding=1)
+        # self.conv11 = nn.Conv2d(in_channels, 64, kernel_size=3, padding=1)
+        self.conv11 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         self.batchrelu = BatchNormReLU(64)
         self.conv12 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
         self.conv13 = nn.Conv2d(3, 64, kernel_size=1, padding=0)
