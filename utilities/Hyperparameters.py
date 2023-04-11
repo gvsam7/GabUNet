@@ -24,6 +24,6 @@ def arguments():
                                                                'gmac_unet=GMAC_UNet, mixpgmac_unet=MixPGMAC_UNet,'
                                                                'asymunet=AsymUNet, dilmixpgmac_unet=DilMixPGMAC_UNet,'
                                                                'resunet=ResUNet, gabmpresunet=GabMPResUNet,'
-                                                               'dilresunnet=DilResUNet')
+                                                               'dilresunnet=DilResUNet, dilgabmpreunet=DilGabMPResUNet')
 
     return parser.parse_args()

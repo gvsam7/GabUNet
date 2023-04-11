@@ -118,6 +118,40 @@ class ResBlockMP(nn.Module):
         return skip
 
 
+class DilResBlockMP(nn.Module):
+    def __init__(self, in_channels, out_channels, stride=1):
+        super(DilResBlockMP, self).__init__()
+
+        # Convolutional layer
+        self.bn1 = BatchNormReLU(in_channels)
+        self.conv1 = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=1),
+                MixPool(2, 2, 0, 0.8)
+            )
+        self.bn2 = BatchNormReLU(out_channels)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, stride=1)
+        # Dilated convolution
+        self.dil = DACBlock(out_channels, out_channels)
+
+        # Shortcut Connection (Identity Mapping)
+        self.skip = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=1),
+                MixPool(2, 2, 0, 0.8)
+            )
+
+    def forward(self, inputs):
+        x = self.bn1(inputs)
+        x = self.conv1(x)
+        x = self.bn2(x)
+        x = self.conv2(x)
+        # added dilated conv
+        x = self.dil(x)
+        s = self.skip(inputs)
+
+        skip = x + s
+        return skip
+
+
 class Decoder(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(Decoder, self).__init__()
@@ -138,6 +172,20 @@ class DilDecoder(nn.Module):
 
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         self.res = DilResBlock(in_channels+out_channels, out_channels)
+
+    def forward(self, x, skip):
+        x = self.upsample(x)
+        x = torch.cat([x, skip], axis=1)
+        x = self.res(x)
+        return x
+
+
+class DilDecoderMP(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(DilDecoderMP, self).__init__()
+
+        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.res = DilResBlockMP(in_channels+out_channels, out_channels)
 
     def forward(self, x, skip):
         x = self.upsample(x)
