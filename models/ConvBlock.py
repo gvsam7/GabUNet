@@ -36,6 +36,34 @@ class BatchNormReLU(nn.Module):
         return x
 
 
+class DilResBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, stride=1):
+        super(DilResBlock, self).__init__()
+
+        # Convolutional layer
+        self.bn1 = BatchNormReLU(in_channels)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=stride)
+        self.bn2 = BatchNormReLU(out_channels)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, stride=1)
+        # Dilated convolution
+        self.dil = DACBlock(out_channels, out_channels)
+
+        # Shortcut Connection (Identity Mapping)
+        self.skip = nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=stride)
+
+    def forward(self, inputs):
+        x = self.bn1(inputs)
+        x = self.conv1(x)
+        x = self.bn2(x)
+        x = self.conv2(x)
+        # added dilated conv
+        x = self.dil(x)
+        s = self.skip(inputs)
+
+        skip = x + s
+        return skip
+
+
 class ResBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1):
         super(ResBlock, self).__init__()
@@ -96,6 +124,20 @@ class Decoder(nn.Module):
 
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         self.res = ResBlock(in_channels+out_channels, out_channels)
+
+    def forward(self, x, skip):
+        x = self.upsample(x)
+        x = torch.cat([x, skip], axis=1)
+        x = self.res(x)
+        return x
+
+
+class DilDecoder(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(DilDecoder, self).__init__()
+
+        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.res = DilResBlock(in_channels+out_channels, out_channels)
 
     def forward(self, x, skip):
         x = self.upsample(x)
