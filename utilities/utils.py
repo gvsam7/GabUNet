@@ -117,7 +117,7 @@ def database(data):
     return image_path, mask_path
 
 
-def train(loader, model, optimizer, criterion, scaler, num_class, device):
+def train(loader, model, optimizer, criterion, scaler, gradient_accumulations, num_class, device):
     loop = tqdm(loader)
 
     for batch_idx, (data, targets) in enumerate(loop):
@@ -134,9 +134,14 @@ def train(loader, model, optimizer, criterion, scaler, num_class, device):
 
         # backward
         optimizer.zero_grad()
-        scaler.scale(loss).backward()
-        scaler.step(optimizer)
-        scaler.update()
+        # scaler.scale(loss).backward()
+        # scaler.step(optimizer)
+        # scaler.update()
+        scaler.scale(loss / gradient_accumulations).backward()
+
+        if (batch_idx + 1) % gradient_accumulations == 0:
+            scaler.step(optimizer)
+            scaler.update()
 
         # update tqdm loop
         loop.set_postfix(loss=loss.item())
