@@ -199,6 +199,7 @@ def main():
             plot(image, mask, pred_mask, score)
             plt.savefig('saved_images/prediction' + str(i) + '.jpg')
             wandb.save(os.path.join('saved_images', '*'))
+            plt.close('all')
         else:
             i += 1
 
