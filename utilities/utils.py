@@ -133,7 +133,7 @@ def train(loader, model, optimizer, criterion, scaler, gradient_accumulations, n
             loss = criterion(predictions, targets)
 
         # backward
-        optimizer.zero_grad()
+        # optimizer.zero_grad()
         # scaler.scale(loss).backward()
         # scaler.step(optimizer)
         # scaler.update()
@@ -142,6 +142,7 @@ def train(loader, model, optimizer, criterion, scaler, gradient_accumulations, n
         if (batch_idx + 1) % gradient_accumulations == 0:
             scaler.step(optimizer)
             scaler.update()
+            optimizer.zero_grad()
 
         # update tqdm loop
         loop.set_postfix(loss=loss.item())
