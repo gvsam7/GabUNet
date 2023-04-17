@@ -14,7 +14,7 @@ def arguments():
     parser.add_argument("--saved-images", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--batch-size", type=int, default=16)
-    parser.add_argument("--grad-accum", type=int, default=16)
+    # parser.add_argument("--grad-accum", type=int, default=16)
     parser.add_argument("--height", type=int, default=160)
     parser.add_argument("--width", type=int, default=240)
     parser.add_argument("--save-model", default=True)

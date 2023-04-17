@@ -144,13 +144,15 @@ def main():
 
     check_accuracy(val_loader, model, device=device, num_class=args.num_class)
     scaler = torch.cuda.amp.GradScaler()
-    gradient_accumulations = args.grad_accum
-    print(f"Gradient accumulations = {gradient_accumulations}")
+    # Gradient Accumulation step
+    # gradient_accumulations = args.grad_accum
+    # print(f"Gradient accumulations = {gradient_accumulations}")
 
     ############################################# Train ###############################################################
     for epoch in range(args.epochs):
         since = time.time()
-        train(train_loader, model, optimizer, criterion, scaler, gradient_accumulations, args.num_class, device)
+        train(train_loader, model, optimizer, criterion, scaler, args.num_class, device)
+        # train(train_loader, model, optimizer, criterion, scaler, gradient_accumulations, args.num_class, device)
 
         # Saving model
         if args.save_model == 'True':
