@@ -177,7 +177,7 @@ def plot(image, mask, pred_mask, score):
     ax3.plot()
 
 
-def jaccard(pred_mask, mask, smooth=1e-10, n_classes=1):
+def jaccard(pred_mask, mask, smooth=1e-10, n_classes=2):
     with torch.no_grad():
         pred_mask = F.softmax(pred_mask, dim=1)
         pred_mask = torch.argmax(pred_mask, dim=1)
