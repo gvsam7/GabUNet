@@ -110,6 +110,9 @@ def database(data):
     elif data == 'uavid':
         image_path = "Data_UAVid/train_images/"
         mask_path = "Data_UAVid/train_masks/"
+    elif data == 'treecrown':
+        image_path = "Data_TreeCrown/train_images/"
+        mask_path = "Data_TreeCrown/train_masks/"
     else:
         image_path = "Data_Water/train_images/"
         mask_path = "Data_Water/train_masks/"

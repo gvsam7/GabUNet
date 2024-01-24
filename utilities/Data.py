@@ -20,6 +20,8 @@ class Dataset(Dataset):
     def __getitem__(self, index):
         img_path = os.path.join(self.img_path, self.images[index])
         mask_path = os.path.join(self.mask_path, self.images[index].replace(".jpg", ".png"))
+        print("Image Path:", img_path)
+        print("Mask Path:", mask_path)
         image = np.array(Image.open(img_path).convert("RGB"))
         mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32)  # L is for gray scale images
         # create some pre-process for the mask, and will look for where it is equal to 255 and will change that to 1
