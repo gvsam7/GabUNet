@@ -171,10 +171,10 @@ def main():
               "Time: {:.2f}m".format((time.time() - since) / 60))
 
         # print some examples to a folder
-        # save_predictions_as_imgs(val_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
-        # wandb.save(os.path.join('saved_images', '*'))
+        save_predictions_as_imgs(val_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
+        wandb.save(os.path.join('saved_images', '*'))
 
-        # save_table(val_loader, args.num_class, model,  "Predictions", device)
+        save_table(val_loader, args.num_class, model,  "Predictions", device)
 
     ################################################ Test #############################################################
     print("Testing Data...")
