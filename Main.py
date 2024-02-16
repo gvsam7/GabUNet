@@ -57,8 +57,8 @@ def main():
 
     # datasets
     image_path, mask_path = database(args.data)
-    print(f"image path: {image_path}")
-    print(f"mask_path: {mask_path}")
+    # print(f"image path: {image_path}")
+    # print(f"mask_path: {mask_path}")
 
     df = dataframe(image_path)
     print(f'Total Images: {len(df)}')
@@ -72,6 +72,7 @@ def main():
     print(f"Test size: {len(X_test)}")
     print(f"Random State: {args.random_state}")
 
+    """
     img = Image.open(image_path + df['id'][39] + '.jpg')
     mask = Image.open(mask_path + df['id'][39] + '.png')
     print(f"Image size: {np.asarray(img).shape}")
@@ -81,6 +82,7 @@ def main():
     plt.imshow(mask, alpha=0.6)
     plt.title('Image with Applied Masks')
     # plt.show()
+    """
 
     train_transform = A.Compose(
         [
@@ -179,8 +181,8 @@ def main():
     test_accuracy(test_loader, model, device=device, num_class=args.num_class)
 
     # print some examples to a folder
-    # save_predictions_as_imgs(test_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
-    # wandb.save(os.path.join('saved_images', '*'))
+    save_predictions_as_imgs(test_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
+    wandb.save(os.path.join('saved_images', '*'))
 
     # save_table(test_loader, args.num_class, model,  "Predictions", device)
     test_set = test_ds
