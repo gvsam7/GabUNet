@@ -442,7 +442,7 @@ def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", d
     model.train()
 
 
-def save_table(loader, num_class, model, table_name, device):
+"""def save_table(loader, num_class, model, table_name, device):
     table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=True)
 
     for bx, data in tqdm(enumerate(loader), total=len(loader)):
@@ -486,5 +486,60 @@ def save_table(loader, num_class, model, table_name, device):
             wandb.Image(cv2.cvtColor(cv2.imread("predicted_mask.jpg"), cv2.COLOR_BGR2RGB))
         )
 
+    wandb.log({table_name: table})"""
+
+import torch
+import wandb
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
+import torch.nn as nn
+
+
+def save_table(loader, num_class, model, table_name, device):
+    table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=True)
+
+    for bx, data in tqdm(enumerate(loader), total=len(loader)):
+        im, mask = data
+        im = im.to(device=device)
+        mask = mask.to(device=device)
+
+        with torch.no_grad():
+            if num_class == 1:
+                _mask = torch.sigmoid(model(im))
+                _mask = (_mask > 0.5).float()
+                _mask = _mask.squeeze(1)
+            else:
+                softmax = nn.Softmax(dim=1)
+                _mask = torch.argmax(softmax(model(im)), axis=1)
+
+        mean = torch.tensor([0.0, 0.0, 0.0], device=device)
+        std = torch.tensor([1.0, 1.0, 1.0], device=device)
+        im = im * std[:, None, None] + mean[:, None, None]
+
+        # Convert tensors to numpy arrays
+        im_np = im[0].permute(1, 2, 0).cpu().numpy()
+        mask_np = mask[0].permute(1, 2, 0).cpu().numpy()[:, :, 0]
+        pred_mask_np = _mask.permute(1, 2, 0).cpu().numpy()[:, :, 0]
+
+        # Scale mask values to range [0, 255]
+        mask_np = (mask_np * 255).astype(np.uint8)
+        pred_mask_np = (pred_mask_np * 255).astype(np.uint8)
+
+        # Save images
+        cv2.imwrite("original_image.jpg", cv2.cvtColor(im_np, cv2.COLOR_RGB2BGR))
+        cv2.imwrite("original_mask.jpg", mask_np)
+        cv2.imwrite("predicted_mask.jpg", pred_mask_np)
+
+        # Add images to wandb Table
+        table.add_data(
+            wandb.Image(cv2.imread("original_image.jpg")),
+            wandb.Image(cv2.imread("original_mask.jpg")),
+            wandb.Image(cv2.imread("predicted_mask.jpg"))
+        )
+
+    # Log the table to wandb
     wandb.log({table_name: table})
+
 
