@@ -443,7 +443,7 @@ def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", d
 
 
 def save_table(loader, num_class, model, table_name, device):
-    table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=True)
+    table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=False)
 
     for bx, data in tqdm(enumerate(loader), total=len(loader)):
         im, mask = data
