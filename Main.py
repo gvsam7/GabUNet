@@ -49,7 +49,8 @@ from utilities.utils import (
 
 def main():
     args = arguments()
-    wandb.init(entity="predictive-analytics-lab", project="SemSeg", config=args)
+    # wandb.init(entity="predictive-analytics-lab", project="SemSeg", config=args)
+    wandb.init(project="SemSeg", config=args)
 
     # Set device
     device = "cuda" if torch.cuda.is_available() else "cpu"
