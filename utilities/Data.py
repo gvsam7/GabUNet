@@ -62,6 +62,10 @@ class Dataset(Dataset):
         return image, mask
 
 
+def get_filename(dataset, index):
+    return dataset.images[index]
+
+
 """
 # This is the original, working for 3-channel RGB code!!!
 class Dataset(Dataset):
