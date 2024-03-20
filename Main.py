@@ -198,11 +198,12 @@ def main():
     for i in range(len(X_test)):
         if i % args.saved_images == 0:
             test_set = test_ds
-            image, mask = test_set[i]
+            image, mask, image_filename = test_set[i]
             pred_mask, score = predict_image_mask_miou(model, image, mask, device=device)
             # plot(image.permute(1, 2, 0).detach().cpu()[:, :, 0], mask, pred_mask, score) # green original image
             plot(image, mask, pred_mask, score)
-            plt.savefig('saved_images/prediction' + str(i) + '.jpg')
+            # plt.savefig('saved_images/prediction' + str(i) + '.jpg')
+            plt.savefig(f'saved_images/prediction_{i}_image_{image_filename}.jpg')
             wandb.save(os.path.join('saved_images', '*'))
             plt.close('all')
         else:
