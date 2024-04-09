@@ -62,7 +62,7 @@ class Dataset(Dataset):
         return image, mask
 
 
-def aname(dataset, index):
+def get_filename(dataset, index):
     return dataset.images[index]
 
 
@@ -99,6 +99,6 @@ class Dataset(Dataset):
 
         return image, mask
 
-
+# New addition
 def get_filename(dataset, index):
     return dataset.images[index]
