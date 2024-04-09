@@ -94,8 +94,7 @@ def main():
             A.VerticalFlip(p=0.1),
             A.Normalize(mean=[0.0, 0.0, 0.0], std=[1.0, 1.0, 1.0], max_pixel_value=255.0),
             ToTensorV2()
-        ],
-        additional_targets={'mask': 'mask'}  # Treat 'mask' as an additional target
+        ]
     )
 
     val_transform = A.Compose(
@@ -103,8 +102,7 @@ def main():
             A.Resize(height=args.height, width=args.width),
             A.Normalize(mean=[0.0, 0.0, 0.0], std=[1.0, 1.0, 1.0], max_pixel_value=255.0),
             ToTensorV2()
-        ],
-        additional_targets={'mask': 'mask'}  # Treat 'mask' as an additional target
+        ]
     )
 
     test_transform = A.Compose(
@@ -112,8 +110,7 @@ def main():
             A.Resize(height=args.height, width=args.width),
             A.Normalize(mean=[0.0, 0.0, 0.0], std=[1.0, 1.0, 1.0], max_pixel_value=255.0),
             ToTensorV2()
-        ],
-        additional_targets={'mask': 'mask'}  # Treat 'mask' as an additional target
+        ]
     )
 
     model = networks(architecture=args.architecture, in_channels=args.in_channels, num_class=args.num_class).to(device)
