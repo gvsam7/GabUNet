@@ -97,7 +97,7 @@ class Dataset(Dataset):
             image = augmentations["image"]
             mask = augmentations["mask"]
 
-            # Ensure image and mask have consistent dimensions
+            # Ensure image and mask have consistent dimensions!
             if image.shape[-2:] != mask.shape[-2:]:
                 raise ValueError("Dimensions of image and mask do not match after transformation.")
 
