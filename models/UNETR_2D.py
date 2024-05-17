@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from utilities.Hyperparameters import arguments
 
 
 class ConvBlock(nn.Module):
@@ -160,7 +159,7 @@ class UNETR_2D(nn.Module):
         return output
 
 """
-# Test
+###################################################### Test ############################################################
 if __name__ == "__main__":
     args = arguments()
     config = {

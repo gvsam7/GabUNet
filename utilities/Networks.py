@@ -14,22 +14,6 @@ from models.DilGabMPResUNet import DilGabMPResUNet
 from models.ViTResUNet import ViTResUNet
 from models.ViTResUNet18 import ViTResUNet18
 from models.UNETR_2D import UNETR_2D
-from utilities.Hyperparameters import arguments
-
-
-
-args = arguments()
-config = {
-        "image_size": args.image_size,
-        "num_layers": args.num_layers,
-        "hidden_dim": args.hidden_dim,
-        "mlp_dim": args.mlp_dim,
-        "num_heads": args.num_heads,
-        "dropout_rate": args.dropout_rate,
-        "num_patches": (args.image_size // args.patch_size) ** 2,
-        "patch_size": args.patch_size,
-        "num_channels": args.in_channels
-    }
 
 
 def networks(architecture, in_channels, num_class, config=None):
