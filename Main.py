@@ -50,6 +50,18 @@ from utilities.utils import (
 
 def main():
     args = arguments()
+    config = {
+        "image_size": args.image_size,
+        "num_layers": args.num_layers,
+        "hidden_dim": args.hidden_dim,
+        "mlp_dim": args.mlp_dim,
+        "num_heads": args.num_heads,
+        "dropout_rate": args.dropout_rate,
+        "num_patches": (args.image_size // args.patch_size) ** 2,
+        "patch_size": args.patch_size,
+        "num_channels": args.in_channels
+    }
+
     # wandb.init(entity="predictive-analytics-lab", project="SemSeg", config=args)
     wandb.init(project="SemSeg", config=args)
 
@@ -113,7 +125,8 @@ def main():
         ]
     )
 
-    model = networks(architecture=args.architecture, in_channels=args.in_channels, num_class=args.num_class).to(device)
+    model = networks(architecture=args.architecture, in_channels=args.in_channels, num_class=args.num_class,
+                     config=config if args.architecture == 'unetr_2d' else None).to(device)
     print(model)
     n_parameters = num_parameters(model)
     print(f"The model has {n_parameters:,} trainable parameters")

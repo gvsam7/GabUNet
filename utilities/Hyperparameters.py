@@ -26,6 +26,16 @@ def arguments():
                                                                'gmac_unet=GMAC_UNet, mixpgmac_unet=MixPGMAC_UNet,'
                                                                'asymunet=AsymUNet, dilmixpgmac_unet=DilMixPGMAC_UNet,'
                                                                'resunet=ResUNet, gabmpresunet=GabMPResUNet,'
-                                                               'dilresunnet=DilResUNet, dilgabmpresunet=DilGabMPResUNet')
+                                                               'dilresunnet=DilResUNet, dilgabmpresunet=DilGabMPResUNet,'
+                                                               'vitresunet=VitResUNet, vitresunet18=ViTResUNet18,'
+                                                               'unetr_2d=UNETR_2D')
+    # Transformer
+    parser.add_argument("--image-size", type=int, default=128)
+    parser.add_argument("--num-layers", type=int, default=12)
+    parser.add_argument("--hidden-dim", type=int, default=768)
+    parser.add_argument("--mlp-dim", type=int, default=3072)
+    parser.add_argument("--num-heads", type=int, default=12)
+    parser.add_argument("--dropout-rate", type=float, default=0.1)
+    parser.add_argument("--patch-size", type=int, default=16)
 
     return parser.parse_args()
