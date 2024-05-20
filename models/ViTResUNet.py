@@ -64,16 +64,16 @@ class Decoder(nn.Module):
             # Resize skip to match x's size if necessary
             skip = nn.functional.interpolate(skip, size=x.size()[2:], mode='bilinear', align_corners=True)
 
-        print("Size of x before concatenation:", x.size())
-        print("Size of skip before concatenation:", skip.size())
+        # print("Size of x before concatenation:", x.size())
+        # print("Size of skip before concatenation:", skip.size())
 
-        # Ensure that the skip connection has the same spatial dimensions as x
+        """"# Ensure that the skip connection has the same spatial dimensions as x
         if skip.size()[2:] != x.size()[2:]:
             # Resize skip to match x's size if necessary
             skip = nn.functional.interpolate(skip, size=x.size()[2:], mode='bilinear', align_corners=True)
 
         print("Size of x before concatenation:", x.size())
-        print("Size of skip before concatenation:", skip.size())
+        print("Size of skip before concatenation:", skip.size())"""
 
         x = torch.cat([x, skip], dim=1)
 
@@ -92,9 +92,9 @@ class Decoder(nn.Module):
         print("Size of skip after resizing:", skip.size())
 
         x = torch.cat([x, skip], dim=1)"""
-        print("Size of concatenated tensor:", x.size())
+        # print("Size of concatenated tensor:", x.size())
         x = self.res(x)
-        print(f"ResBlock")
+        # print(f"ResBlock")
         return x
 
 
@@ -114,15 +114,15 @@ class ResBlock(nn.Module):
 
     def forward(self, x):
         identity = self.skip_stride1(x) if self.conv1.stride == 1 else self.skip_other(x)
-        print("Size of input tensor x:", x.size())
+        # print("Size of input tensor x:", x.size())
 
         x = self.conv1(x)
-        print("Size after Conv1:", x.size())
+        # print("Size after Conv1:", x.size())
         x = self.bn1(x)
         x = nn.ReLU(inplace=True)(x)
 
         x = self.conv2(x)
-        print("Size after Conv2:", x.size())
+        # print("Size after Conv2:", x.size())
         x = self.bn2(x)
 
         x += identity
@@ -153,7 +153,7 @@ class ResNetEncoder(nn.Module):
 
     def forward(self, x):
         # Assuming x is the input tensor passed to ResNetEncoder
-        print("Size of input tensor x:", x.size())
+        # print("Size of input tensor x:", x.size())
 
         x = self.conv1(x)
         x = self.bn1(x)
@@ -188,8 +188,9 @@ class ViTResUNet(nn.Module):
         # Decoder
         self.dec1 = Decoder(512, 256, output_size=(256, 512))
         # self.dec2 = Decoder(512, 128, output_size=(128, 256))
-        self.dec2 = Decoder(256, 128, output_size=(128, 256))
-        self.dec3 = Decoder(128, 64, output_size=(64, 128))
+        # self.dec2 = Decoder(in_channels=256 + num_skip_channels, out_channels=128, output_size=(128, 256))
+        self.dec2 = Decoder(256+128, 128, output_size=(128, 256))
+        self.dec3 = Decoder(128+192, 64, output_size=(128, 128))  # could be to run with images: self.dec3 = Decoder(128+192, 64, output_size=(128, 128))
 
         # Output
         self.out = nn.Conv2d(64, self.num_classes, kernel_size=1, padding=0)
@@ -217,11 +218,11 @@ class ViTResUNet(nn.Module):
         bridge_out = self.bridge(x_patch)
 
         # Decoder
-        print(f"Decoder1: ")
+        # print(f"Decoder1: ")
         d1 = self.dec1(bridge_out, x1)
-        print(f"Decoder2: ")
+        # print(f"Decoder2: ")
         d2 = self.dec2(d1, x1)
-        print(f"Decoder3: ")
+        # print(f"Decoder3: ")
         d3 = self.dec3(d2, x1)
 
         # Output
@@ -310,14 +311,15 @@ class ViTResUNet(nn.Module):
 
         return out"""
 
-
-# Test the model with dummy input
+"""
+######################################## Test the model with dummy input ###############################################
 if __name__ == "__main__":
     # Create a dummy input tensor
-    dummy_input = torch.randn(1, 3, 256, 512)  # Assuming input image size is 256x512 and has 3 channels
+    dummy_input = torch.randn(1, 3, 128, 128)  # Assuming input image size is 256x512 and has 3 channels
     # Create an instance of the ViTResUNet18 model
     model = ViTResUNet(in_channels=3, num_classes=2)
+    print(model)
     # Forward pass through the model
     output = model(dummy_input)
     # Print the shape of the output tensor
-    print("Output shape:", output.shape)
+    print("Output shape:", output.shape)"""
