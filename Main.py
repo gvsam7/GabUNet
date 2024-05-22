@@ -206,6 +206,10 @@ def main():
 
     mob_acc = pixel_acc(model, test_set)
 
+    print('Test Set mIoU', np.mean(mob_miou))
+
+    print('Test Set Pixel Accuracy', np.mean(mob_acc))
+
     i = 0
     # for i in tqdm(range(len(test_set))):
     # for i in range(len(X_test[:2])):

@@ -1,8 +1,18 @@
 import torch
 import torch.nn as nn
 from einops import rearrange
-# from models.ConvBlock import BatchNormReLU, Decoder, GaborConv2d, BatchNormReLU
 from utilities.utils import num_parameters
+
+"""
+Description: The ViTResUNet model is a fusion of convolutional neural network (CNN) and transformer architectures, 
+            designed for the task of semantic segmentation. It leverages the strengths of both architectures to capture 
+            spatial information efficiently while also modeling long-range dependencies in the input data. This is 
+            achieved by combining the strengths of U-Net, CNN, and Vision Transformer (ViT), leveraging the powerful 
+            feature extraction capabilities of the ResNet-based encoder and the attention mechanisms of ViT for semantic
+            segmentation tasks. Integrating ViT's attention mechanism can potentially enhance the model's ability to 
+            capture long-range dependencies and improve performance, especially in tasks involving semantic segmentation 
+            or image classification.
+"""
 
 
 class Decoder(nn.Module):
@@ -158,7 +168,7 @@ class ViTResUNet(nn.Module):
 
         return out
 
-"""
+
 ######################################## Test the model with dummy input ###############################################
 if __name__ == "__main__":
     # Create a dummy input tensor
@@ -171,4 +181,4 @@ if __name__ == "__main__":
     # Forward pass through the model
     output = model(dummy_input)
     # Print the shape of the output tensor
-    print("Output shape:", output.shape)"""
+    print("Output shape:", output.shape)
