@@ -168,7 +168,7 @@ class ViTResUNet(nn.Module):
 
         return out
 
-
+"""
 ######################################## Test the model with dummy input ###############################################
 if __name__ == "__main__":
     # Create a dummy input tensor
@@ -181,4 +181,4 @@ if __name__ == "__main__":
     # Forward pass through the model
     output = model(dummy_input)
     # Print the shape of the output tensor
-    print("Output shape:", output.shape)
+    print("Output shape:", output.shape)"""
