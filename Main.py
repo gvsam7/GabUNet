@@ -228,10 +228,6 @@ def main():
         else:
             i += 1
 
-    print('Test Set mIoU', np.mean(mob_miou))
-
-    print('Test Set Pixel Accuracy', np.mean(mob_acc))
-
     wandb.save('my_checkpoint.pth.tar')
 
 
