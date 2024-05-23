@@ -1,17 +1,18 @@
 import torch
 import torch.nn as nn
-from einops import rearrange
+from models.ConvBlock import GaborConv2d, DACBlock
+from models.MixPool import MixPool
 from utilities.utils import num_parameters
 
 """
-Description: The ViTResUNet model is a fusion of convolutional neural network (CNN) and transformer architectures, 
-            designed for the task of semantic segmentation. It leverages the strengths of both architectures to capture 
-            spatial information efficiently while also modeling long-range dependencies in the input data. This is 
-            achieved by combining the strengths of U-Net, CNN, and Vision Transformer (ViT), leveraging the powerful 
-            feature extraction capabilities of the ResNet-based encoder and the attention mechanisms of ViT for semantic
-            segmentation tasks. Integrating ViT's attention mechanism can potentially enhance the model's ability to 
-            capture long-range dependencies and improve performance, especially in tasks involving semantic segmentation 
-            or image classification.
+Description: The DilGabMPViTResUNet model is a fusion of convolutional neural network (CNN), transformer architectures,
+            and texture bias with a wider receptive field, designed for the task of semantic segmentation. 
+            It leverages the strengths of both architectures, plus texture biases to capture spatial information 
+            efficiently while also modeling long-range dependencies in the input data. This is achieved by combining the
+            strengths of U-Net, CNN, and Vision Transformer (ViT), leveraging the powerful feature extraction 
+            capabilities of the ResNet-based encoder, the attention of averaged dilated convolutions, texture biases, 
+            and the attention mechanisms of ViT for semantic segmentation tasks. Integrating ViT's attention mechanism 
+            can potentially enhance the model's ability to capture long-range dependencies and improve performance.
 """
 
 
@@ -48,17 +49,29 @@ class ResBlock(nn.Module):
         super(ResBlock, self).__init__()
 
         # Convolutional layers
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=stride)
+        if stride == 2:
+            self.conv1 = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=1),
+                MixPool(2, 2, 0, 0.8)
+            )
+            # self.skip = nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=stride)
+            self.skip = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=1),
+                MixPool(2, 2, 0, 0.8)
+            )
+        else:
+            self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=stride)
+            self.skip = nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=1)
+
         self.bn1 = nn.BatchNorm2d(out_channels)
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, stride=1)
         self.bn2 = nn.BatchNorm2d(out_channels)
 
-        ## Shortcut Connection (Identity Mapping)
-        self.skip_stride1 = nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=1)
-        self.skip_other = nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=stride)
+        # Dilated convolution
+        self.dil = DACBlock(out_channels, out_channels)
 
     def forward(self, x):
-        identity = self.skip_stride1(x) if self.conv1.stride == 1 else self.skip_other(x)
+        identity = self.skip(x)
 
         x = self.conv1(x)
         x = self.bn1(x)
@@ -66,6 +79,8 @@ class ResBlock(nn.Module):
 
         x = self.conv2(x)
         x = self.bn2(x)
+        # added dilated conv
+        x = self.dil(x)
 
         x += identity
         x = nn.ReLU(inplace=True)(x)
@@ -76,10 +91,12 @@ class ResNetEncoder(nn.Module):
     def __init__(self, block, layers, in_channels):
         super(ResNetEncoder, self).__init__()
         self.in_channels = 64
-        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        # self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.mixpool = MixPool(2, 2, 0, 0.8)
         self.layer1 = self._make_layer(block, 64, layers[0], stride=1)
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
@@ -100,7 +117,8 @@ class ResNetEncoder(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        x = self.maxpool(x)
+        # x = self.maxpool(x)
+        x = self.mixpool(x)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
@@ -108,9 +126,9 @@ class ResNetEncoder(nn.Module):
         return x
 
 
-class ViTResUNet(nn.Module):
+class DilGabMPViTResUNet(nn.Module):
     def __init__(self, in_channels, num_classes, vit_patch_size=4):
-        super(ViTResUNet, self).__init__()
+        super(DilGabMPViTResUNet, self).__init__()
         self.num_classes = num_classes
         self.vit_patch_size = vit_patch_size
 
@@ -172,9 +190,9 @@ class ViTResUNet(nn.Module):
 ######################################## Test the model with dummy input ###############################################
 if __name__ == "__main__":
     # Create a dummy input tensor
-    dummy_input = torch.randn(1, 3, 256, 256)  # Assuming input image size is 256x512 and has 3 channels
+    dummy_input = torch.randn(1, 3, 128, 128)  # Assuming input image size is 256x512 and has 3 channels
     # Create an instance of the ViTResUNet18 model
-    model = ViTResUNet(in_channels=3, num_classes=2)
+    model = DilGabMPViTResUNet(in_channels=3, num_classes=2)
     print(model)
     n_parameters = num_parameters(model)
     print(f"The model has {n_parameters:,} trainable parameters")

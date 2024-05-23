@@ -28,7 +28,7 @@ def arguments():
                                                                'resunet=ResUNet, gabmpresunet=GabMPResUNet,'
                                                                'dilresunnet=DilResUNet, dilgabmpresunet=DilGabMPResUNet,'
                                                                'vitresunet=VitResUNet, vitresunet18=ViTResUNet18,'
-                                                               'unetr_2d=UNETR_2D')
+                                                               'unetr_2d=UNETR_2D, dilgabmpvitresunet=DilGabMPViTResUNet')
     # Transformer
     parser.add_argument("--image-size", type=int, default=128)
     parser.add_argument("--num-layers", type=int, default=12)
