@@ -13,7 +13,7 @@ from models.DilResUNet import DilResUNet
 from models.DilGabMPResUNet import DilGabMPResUNet
 from models.ViTResUNet import ViTResUNet
 from models.ViTResUNet18 import ViTResUNet18
-from models.DilGabMPVitResUNet import DilGabMPViTResUNet
+from models.DilGabMPViTResUNet import DilGabMPViTResUNet
 from models.UNETR_2D import UNETR_2D
 
 
