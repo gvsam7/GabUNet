@@ -82,7 +82,8 @@ class ResBlock(nn.Module):
         # added dilated conv
         x = self.dil(x)
 
-        x += identity
+        # x += identity
+        x = x + identity
         x = nn.ReLU(inplace=True)(x)
         return x
 
