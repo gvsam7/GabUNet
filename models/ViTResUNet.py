@@ -109,7 +109,7 @@ class ResNetEncoder(nn.Module):
 
 
 class ViTResUNet(nn.Module):
-    def __init__(self, in_channels, num_classes, vit_patch_size=4):
+    def __init__(self, in_channels, num_classes, vit_patch_size=1):
         super(ViTResUNet, self).__init__()
         self.num_classes = num_classes
         self.vit_patch_size = vit_patch_size
@@ -174,7 +174,7 @@ if __name__ == "__main__":
     # Create a dummy input tensor
     dummy_input = torch.randn(1, 3, 256, 256)  # Assuming input image size is 256x512 and has 3 channels
     # Create an instance of the ViTResUNet18 model
-    model = ViTResUNet(in_channels=3, num_classes=2)
+    model = ViTResUNet(in_channels=3, num_classes=2, vit_patch_size=1)
     print(model)
     n_parameters = num_parameters(model)
     print(f"The model has {n_parameters:,} trainable parameters")

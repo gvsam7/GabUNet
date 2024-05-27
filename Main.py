@@ -125,8 +125,12 @@ def main():
         ]
     )
 
+    # model = networks(architecture=args.architecture, in_channels=args.in_channels, num_class=args.num_class,
+    #                  config=config if args.architecture == 'unetr_2d' else None).to(device)
     model = networks(architecture=args.architecture, in_channels=args.in_channels, num_class=args.num_class,
-                     config=config if args.architecture == 'unetr_2d' else None).to(device)
+                     config=config if args.architecture == 'unetr_2d' else None,
+                     patch_size=args.patch_size if args.architecture in ['vitresunet', 'dilgabmpvitresunet'] else None).to(device)
+
     print(model)
     n_parameters = num_parameters(model)
     print(f"The model has {n_parameters:,} trainable parameters")

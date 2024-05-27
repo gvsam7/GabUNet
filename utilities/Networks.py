@@ -17,7 +17,7 @@ from models.DilGabMPViTResUNet import DilGabMPViTResUNet
 from models.UNETR_2D import UNETR_2D
 
 
-def networks(architecture, in_channels, num_class, config=None):
+def networks(architecture, in_channels, num_class, config=None, patch_size=None):
     if architecture == 'unet':
         model = UNet(in_channels, num_class)
     elif architecture == 'mac_unet':
@@ -39,11 +39,11 @@ def networks(architecture, in_channels, num_class, config=None):
     elif architecture == 'dilgabmpresunet':
         model = DilGabMPResUNet(in_channels, num_class)
     elif architecture == 'vitresunet':
-        model = ViTResUNet(in_channels, num_class)
+        model = ViTResUNet(in_channels, num_class, vit_patch_size=patch_size)
     elif architecture == 'vitresunet18':
         model = ViTResUNet18(in_channels, num_class)
     elif architecture == 'dilgabmpvitresunet':
-        model = DilGabMPViTResUNet(in_channels, num_class)
+        model = DilGabMPViTResUNet(in_channels, num_class, vit_patch_size=patch_size)
     elif architecture == 'unetr_2d':
         if config is None:
             raise ValueError("Config dictionary is required for UNETR_2D model")
