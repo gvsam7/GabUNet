@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from utilities.Hyperparameters import arguments
 
 
 class ConvBlock(nn.Module):
@@ -177,7 +178,7 @@ if __name__ == "__main__":
     # Define an input
     x = torch.randn(8, 3, 128, 128)
 
-    model = UNETR_2D(config)
+    model = UNETR_2D(in_channels=3, num_class=2, cf=config)
     y = model(x)
     print(f"y: {y.shape}")"""
 
