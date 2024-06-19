@@ -7,7 +7,8 @@ from PIL import Image
 from torch.utils.data import Dataset
 import numpy as np
 import torch
-"""
+
+
 class Dataset(Dataset):
 
     def __init__(self, img_path, mask_path, ds, transform=None):
@@ -105,4 +106,4 @@ class Dataset(Dataset):
 
 # New addition
 def get_filename(dataset, index):
-    return dataset.images[index]
+    return dataset.images[index]"""
