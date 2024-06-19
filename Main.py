@@ -98,6 +98,12 @@ def main():
     # plt.show()
     """
 
+    # Check unique labels in masks
+    for split_name, split_data in zip(["Train", "Validation", "Test"], [X_train, X_val, X_test]):
+        masks = [np.array(Image.open(mask_path + id + '.png')) for id in split_data]
+        unique_labels = np.unique(masks)
+        print(f"Unique labels in {split_name} masks:", unique_labels)
+
     train_transform = A.Compose(
         [
             A.Resize(height=args.height, width=args.width),
