@@ -26,6 +26,7 @@ from sklearn.model_selection import train_test_split
 from PIL import Image
 import matplotlib.pyplot as plt
 import time
+import csv
 from utilities.Hyperparameters import arguments
 from utilities.Networks import networks
 from utilities.Data import get_filename
@@ -46,6 +47,28 @@ from utilities.utils import (
     save_table,
     num_parameters
 )
+
+
+def create_csv(image_path, mask_path, X_train, X_val, X_test, filename='dataset.csv'):
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Split', 'Image', 'Mask'])
+
+        # Write training data
+        for img_id in X_train:
+            writer.writerow(['Train', f'{image_path}{img_id}.jpg', f'{mask_path}{img_id}.png'])
+
+        # Write validation data
+        for img_id in X_val:
+            writer.writerow(['Validation', f'{image_path}{img_id}.jpg', f'{mask_path}{img_id}.png'])
+
+        # Write test data
+        for img_id in X_test:
+            writer.writerow(['Test', f'{image_path}{img_id}.jpg', f'{mask_path}{img_id}.png'])
+
+    print(f'Dataset CSV file created: {filename}')
+    # Save the CSV file to wandb
+    wandb.save(filename)
 
 
 def main():
@@ -80,6 +103,21 @@ def main():
     # Data split
     X_trainval, X_test = train_test_split(df['id'].values, test_size=0.1, random_state=args.random_state)
     X_train, X_val = train_test_split(X_trainval, test_size=0.15, random_state=args.random_state)
+
+    # Check for overlap between training, validation, and test sets
+    def check_data_split_overlap(X_train, X_val, X_test):
+        train_set = set(X_train)
+        val_set = set(X_val)
+        test_set = set(X_test)
+
+        assert train_set.isdisjoint(val_set), "Training and validation sets overlap!"
+        assert train_set.isdisjoint(test_set), "Training and test sets overlap!"
+        assert val_set.isdisjoint(test_set), "Validation and test sets overlap!"
+
+        print("No overlap found between training, validation, and test sets.")
+
+    # Call the function to check data splits
+    check_data_split_overlap(X_train, X_val, X_test)
 
     print(f"Train size: {len(X_train)}")
     print(f"Validation size: {len(X_val)}")
@@ -130,6 +168,9 @@ def main():
             ToTensorV2()
         ]
     )
+
+    # Create a CSV listing all train, validation, and test images
+    create_csv(image_path, mask_path, X_train, X_val, X_test)
 
     # model = networks(architecture=args.architecture, in_channels=args.in_channels, num_class=args.num_class,
     #                  config=config if args.architecture == 'unetr_2d' else None).to(device)
