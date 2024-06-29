@@ -80,10 +80,16 @@ def create_csv(image_path, mask_path, X_train, X_val, X_test, filename='dataset.
 
 
 def clear_wandb_cache():
-    cache_dir = wandb.util.get_cache_dir()
+    wandb_dir = os.path.join(os.path.expanduser("~"), ".wandb")
+    cache_dir = os.path.join(wandb_dir, "cache")
     if os.path.exists(cache_dir):
-        shutil.rmtree(cache_dir)
-    os.makedirs(cache_dir)
+        try:
+            shutil.rmtree(cache_dir)
+            print(f"Cleared wandb cache directory: {cache_dir}")
+        except Exception as e:
+            print(f"Error clearing wandb cache: {e}")
+    else:
+        print(f"Wandb cache directory not found: {cache_dir}")
 
 
 def main():
