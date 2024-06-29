@@ -489,12 +489,16 @@ def save_and_log(image_tensor, filename):
     plt.figure(figsize=(10, 10))
     plt.axis("off")
 
-    # Convert to numpy and change from (C, H, W) to (H, W, C)
-    image_np = image_tensor.cpu().squeeze().permute(1, 2, 0).numpy()
+    # Convert to numpy and handle both 2D and 3D tensors
+    image_np = image_tensor.cpu().squeeze().numpy()
 
-    # Handle grayscale images
-    if image_np.shape[-1] == 1:
-        plt.imshow(image_np.squeeze(), cmap='gray')
+    # If the image is 3D (C, H, W), convert to (H, W, C)
+    if len(image_np.shape) == 3 and image_np.shape[0] in [1, 3, 4]:
+        image_np = np.transpose(image_np, (1, 2, 0))
+
+    # Handle grayscale and RGB images
+    if len(image_np.shape) == 2 or image_np.shape[-1] == 1:
+        plt.imshow(image_np, cmap='gray')
     else:
         plt.imshow(image_np)
 
