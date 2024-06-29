@@ -444,8 +444,59 @@ def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", d
 
     model.train()
 
+import os
+import uuid
+
 
 def save_table(loader, num_class, model, table_name, device):
+    table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'])
+    model.eval()  # Set model to evaluation mode
+
+    with torch.no_grad():
+        for bx, (im, mask) in enumerate(tqdm(loader, total=len(loader))):
+            im = im.to(device=device)
+            mask = mask.to(device=device)
+
+            if num_class == 1:
+                pred_mask = torch.sigmoid(model(im))
+                pred_mask = (pred_mask > 0.5).float()
+            else:
+                softmax = nn.Softmax(dim=1)
+                pred_mask = torch.argmax(softmax(model(im)), axis=1)
+
+            # Generate unique filenames
+            unique_id = uuid.uuid4()
+            orig_img_file = f"original_image_{unique_id}.png"
+            orig_mask_file = f"original_mask_{unique_id}.png"
+            pred_mask_file = f"predicted_mask_{unique_id}.png"
+
+            # Save and log images
+            original_image = save_and_log(im[0], orig_img_file)
+            original_mask = save_and_log(mask[0], orig_mask_file)
+            predicted_mask = save_and_log(pred_mask[0], pred_mask_file)
+
+            table.add_data(original_image, original_mask, predicted_mask)
+
+            # Break after processing a few images to keep the table size manageable
+            if bx >= 9:  # Adjust this number as needed
+                break
+
+    wandb.log({table_name: table})
+    model.train()  # Set model back to training mode
+
+
+def save_and_log(image_tensor, filename):
+    plt.figure(figsize=(10, 10))
+    plt.axis("off")
+    plt.imshow(image_tensor.cpu().squeeze(), cmap='gray' if image_tensor.shape[0] == 1 else None)
+    plt.savefig(filename)
+    plt.close()
+    img = wandb.Image(filename)
+    os.remove(filename)  # Remove the file after logging
+    return img
+
+############################## Origninal (remove_Original) ######################################
+def save_table_Original(loader, num_class, model, table_name, device):
     table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=False)
 
     for bx, data in tqdm(enumerate(loader), total=len(loader)):
