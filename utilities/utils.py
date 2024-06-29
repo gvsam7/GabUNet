@@ -488,7 +488,16 @@ def save_table(loader, num_class, model, table_name, device):
 def save_and_log(image_tensor, filename):
     plt.figure(figsize=(10, 10))
     plt.axis("off")
-    plt.imshow(image_tensor.cpu().squeeze(), cmap='gray' if image_tensor.shape[0] == 1 else None)
+
+    # Convert to numpy and change from (C, H, W) to (H, W, C)
+    image_np = image_tensor.cpu().squeeze().permute(1, 2, 0).numpy()
+
+    # Handle grayscale images
+    if image_np.shape[-1] == 1:
+        plt.imshow(image_np.squeeze(), cmap='gray')
+    else:
+        plt.imshow(image_np)
+
     plt.savefig(filename)
     plt.close()
     img = wandb.Image(filename)
