@@ -464,31 +464,54 @@ def save_table(loader, num_class, model, table_name, device):
         std = torch.tensor([1.0, 1.0, 1.0], device=device)
         im = im * std[:, None, None] + mean[:, None, None]
 
-        """plt.figure(figsize=(10, 10))
+        # Save images with unique filenames
+        original_image_filename = f"original_image_{bx}.jpg"
+        original_mask_filename = f"original_mask_{bx}.jpg"
+        predicted_mask_filename = f"predicted_mask_{bx}.jpg"
+
+        plt.figure(figsize=(10, 10))
         plt.axis("off")
         # plt.imshow(im[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
         plt.imshow(im[0].permute(1, 2, 0).cpu())
-        plt.savefig("original_image.jpg")
+        # plt.savefig("original_image.jpg")
+        plt.savefig(original_image_filename)
         plt.close()
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
         plt.imshow(mask.permute(1, 2, 0).detach().cpu()[:, :, 0])
-        plt.savefig("original_mask.jpg")
+        # plt.savefig("original_mask.jpg")
+        plt.savefig(original_mask_filename)
         plt.close()
 
         plt.figure(figsize=(10, 10))
         plt.axis("off")
         plt.imshow(_mask.permute(1, 2, 0).detach().cpu()[:, :, 0])
-        plt.savefig("predicted_mask.jpg")
+        # plt.savefig("predicted_mask.jpg")
+        plt.savefig(predicted_mask_filename)
         plt.close()
 
-        table.add_data(
+        """table.add_data(
             wandb.Image(cv2.cvtColor(cv2.imread("original_image.jpg"), cv2.COLOR_BGR2RGB)),
             wandb.Image(cv2.cvtColor(cv2.imread("original_mask.jpg"), cv2.COLOR_BGR2RGB)),
             wandb.Image(cv2.cvtColor(cv2.imread("predicted_mask.jpg"), cv2.COLOR_BGR2RGB))
         )"""
 
+        # Add images to Wandb table
+        table.add_data(
+            wandb.Image(cv2.cvtColor(cv2.imread(original_image_filename), cv2.COLOR_BGR2RGB)),
+            wandb.Image(cv2.cvtColor(cv2.imread(original_mask_filename), cv2.COLOR_BGR2RGB)),
+            wandb.Image(cv2.cvtColor(cv2.imread(predicted_mask_filename), cv2.COLOR_BGR2RGB))
+        )
+
+        # Clear temporary images
+        for filename in [original_image_filename, original_mask_filename, predicted_mask_filename]:
+            try:
+                os.remove(filename)
+            except OSError:
+                pass
+
+        """
         # Save and log images
         def save_and_log(image_tensor, filename):
             plt.figure(figsize=(10, 10))
@@ -509,7 +532,7 @@ def save_table(loader, num_class, model, table_name, device):
             try:
                 os.remove(filename)
             except OSError:
-                pass
+                pass"""
 
     wandb.log({table_name: table})
 
