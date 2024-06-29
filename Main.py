@@ -27,6 +27,8 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import time
 import csv
+import sklearn
+import pandas as pd
 from utilities.Hyperparameters import arguments
 from utilities.Networks import networks
 from utilities.Data import get_filename
