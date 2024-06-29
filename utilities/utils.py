@@ -426,6 +426,7 @@ def mIoU(pred_mask, mask, n_classes, smooth=1e-10):
 
 
 def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", device="cuda"):
+    print(f"Number of batches in loader: {len(loader)}")
     model.eval()
     for idx, (img, mask) in enumerate(loader):
         img = img.to(device=device)
@@ -438,9 +439,14 @@ def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", d
                 preds = torch.argmax(softmax(model(img)), axis=1)
                 preds = preds.float()
                 preds = preds.unsqueeze(1)
-        torchvision.utils.save_image(mask.unsqueeze(1), f"{folder}{idx}.png")
+        """torchvision.utils.save_image(mask.unsqueeze(1), f"{folder}{idx}.png")
         torchvision.utils.save_image(img, f"{folder}/img_{idx}.png")
-        torchvision.utils.save_image(preds, f"{folder}/pred_{idx}.png")
+        torchvision.utils.save_image(preds, f"{folder}/pred_{idx}.png")"""
+        for i in range(img.size(0)):
+            image_idx = idx * loader.batch_size + i  # Calculate global image index
+            torchvision.utils.save_image(mask[i].unsqueeze(0), f"{folder}/mask_{image_idx}.png")
+            torchvision.utils.save_image(img[i], f"{folder}/img_{image_idx}.png")
+            torchvision.utils.save_image(preds[i], f"{folder}/pred_{image_idx}.png")
 
     model.train()
 
