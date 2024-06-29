@@ -27,6 +27,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import time
 import csv
+import shutil
 import sklearn
 import pandas as pd
 from utilities.Hyperparameters import arguments
@@ -78,6 +79,13 @@ def create_csv(image_path, mask_path, X_train, X_val, X_test, filename='dataset.
     wandb.save(filename)
 
 
+def clear_wandb_cache():
+    cache_dir = wandb.util.get_cache_dir()
+    if os.path.exists(cache_dir):
+        shutil.rmtree(cache_dir)
+    os.makedirs(cache_dir)
+
+
 def main():
     args = arguments()
     config = {
@@ -92,6 +100,8 @@ def main():
         "num_channels": args.in_channels
     }
 
+    # Clear wandb cache
+    clear_wandb_cache()
     # wandb.init(entity="predictive-analytics-lab", project="SemSeg", config=args)
     wandb.init(project="SemSeg", config=args)
 
