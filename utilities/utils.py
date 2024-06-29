@@ -464,7 +464,7 @@ def save_table(loader, num_class, model, table_name, device):
         std = torch.tensor([1.0, 1.0, 1.0], device=device)
         im = im * std[:, None, None] + mean[:, None, None]
 
-        plt.figure(figsize=(10, 10))
+        """plt.figure(figsize=(10, 10))
         plt.axis("off")
         # plt.imshow(im[0].permute(1, 2, 0).detach().cpu()[:, :, 0])
         plt.imshow(im[0].permute(1, 2, 0).cpu())
@@ -487,7 +487,29 @@ def save_table(loader, num_class, model, table_name, device):
             wandb.Image(cv2.cvtColor(cv2.imread("original_image.jpg"), cv2.COLOR_BGR2RGB)),
             wandb.Image(cv2.cvtColor(cv2.imread("original_mask.jpg"), cv2.COLOR_BGR2RGB)),
             wandb.Image(cv2.cvtColor(cv2.imread("predicted_mask.jpg"), cv2.COLOR_BGR2RGB))
-        )
+        )"""
+
+        # Save and log images
+        def save_and_log(image_tensor, filename):
+            plt.figure(figsize=(10, 10))
+            plt.axis("off")
+            plt.imshow(image_tensor.permute(1, 2, 0).cpu())
+            plt.savefig(filename)
+            plt.close()
+            return wandb.Image(cv2.cvtColor(cv2.imread(filename), cv2.COLOR_BGR2RGB))
+
+        original_image = save_and_log(im[0], "original_image.jpg")
+        original_mask = save_and_log(mask.permute(1, 2, 0).detach(), "original_mask.jpg")
+        predicted_mask = save_and_log(_mask.permute(1, 2, 0).detach(), "predicted_mask.jpg")
+
+        table.add_data(original_image, original_mask, predicted_mask)
+
+        # Clear temporary images to avoid conflicts
+        for filename in ["original_image.jpg", "original_mask.jpg", "predicted_mask.jpg"]:
+            try:
+                os.remove(filename)
+            except OSError:
+                pass
 
     wandb.log({table_name: table})
 
