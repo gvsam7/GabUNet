@@ -51,9 +51,10 @@ from utilities.utils import (
 )
 
 # Check environment version
-print(f"scikit-learn version: {sklearn.__version__}")
-print(f"NumPy version: {np.__version__}")
-print(f"Pandas version: {pd.__version__}")
+# print(f"scikit-learn version: {sklearn.__version__}")
+# print(f"NumPy version: {np.__version__}")
+# print(f"Pandas version: {pd.__version__}")
+
 
 def create_csv(image_path, mask_path, X_train, X_val, X_test, filename='dataset.csv'):
     with open(filename, mode='w', newline='') as file:
@@ -74,7 +75,7 @@ def create_csv(image_path, mask_path, X_train, X_val, X_test, filename='dataset.
 
     print(f'Dataset CSV file created: {filename}')
     # Save the CSV file to wandb
-    # wandb.save(filename)
+    wandb.save(filename)
 
 
 def main():
