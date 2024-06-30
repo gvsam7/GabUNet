@@ -11,6 +11,11 @@ from tqdm import tqdm
 from matplotlib import pyplot as plt
 import cv2
 import wandb
+import csv
+from torchvision.utils import save_image
+import uuid
+import json
+from torchvision.utils import make_grid
 
 
 def num_parameters(model):
@@ -26,6 +31,94 @@ def load_checkpoint(checkpoint, model, optimizer):
     print("=> Loading checkpoint")
     model.load_state_dict(checkpoint["state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer"])
+
+# 30/06/2024
+def save_loader_to_csv(loader, dataset, csv_filename):
+    with open(csv_filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Image', 'Mask'])
+
+        for idx in range(len(dataset)):
+            img_path = os.path.join(dataset.img_path, dataset.ds[idx] + '.jpg')
+            mask_path = os.path.join(dataset.mask_path, dataset.ds[idx] + '.png')
+            writer.writerow([img_path, mask_path])
+
+    print(f'CSV file created: {csv_filename}')
+
+
+# 30/06/2024
+def read_csv(csv_filename):
+    data = {'Split': [], 'Image': [], 'Mask': []}
+    with open(csv_filename, mode='r', newline='') as file:
+        reader = csv.reader(file)
+        header = next(reader)  # Skip header
+        for row in reader:
+            data['Split'].append(row[0])
+            data['Image'].append(row[1])
+            data['Mask'].append(row[2])
+    return data
+
+
+# 30/06/2024
+def verify_test_loader(test_loader):  # , expected_images, expected_masks):
+    test_loader_csv = 'test_loader.csv'
+    test_loader_data = pd.read_csv(test_loader_csv)
+    expected_images = test_loader_data['Image'].tolist()
+    expected_masks = test_loader_data['Mask'].tolist()
+
+    test_loader_images = []
+    test_loader_masks = []
+
+    for img, mask in test_loader:
+        # Assuming img and mask are torch tensors with filenames as strings
+        for i in range(img.size(0)):
+            test_loader_images.append(img[i])
+            test_loader_masks.append(mask[i])
+
+    test_loader_images = set(test_loader_images)
+    test_loader_masks = set(test_loader_masks)
+
+    expected_images_set = set(expected_images)
+    expected_masks_set = set(expected_masks)
+
+    missing_images = expected_images_set - test_loader_images
+    missing_masks = expected_masks_set - test_loader_masks
+
+    if not missing_images and not missing_masks:
+        print("All images and masks processed in test_loader are found in test_loader.csv.")
+    else:
+        print("Mismatch found:")
+        if missing_images:
+            print("Missing images:")
+            for img in missing_images:
+                print(img)
+        if missing_masks:
+            print("Missing masks:")
+            for mask in missing_masks:
+                print(mask)
+
+    """# Extract unique image and mask file paths from temp_files (which is test_loader in this case)
+    temp_image_files = [file for file in test_loader if file.startswith('original_image')]
+    temp_mask_files = [file for file in test_loader if file.startswith('original_mask')]
+
+    processed_images = set(temp_image_files)
+    processed_masks = set(temp_mask_files)
+
+    missing_images = [img for img in expected_images if img not in processed_images]
+    missing_masks = [mask for mask in expected_masks if mask not in processed_masks]
+
+    if not missing_images and not missing_masks:
+        print("All images and masks processed in save_table are found in test_loader.")
+    else:
+        print("Mismatch found:")
+        if missing_images:
+            print("Missing images:")
+            for img in missing_images:
+                print(img)
+        if missing_masks:
+            print("Missing masks:")
+            for mask in missing_masks:
+                print(mask)"""
 
 
 def get_loaders(
@@ -86,6 +179,11 @@ def get_loaders(
         pin_memory=pin_memory,
         shuffle=False,
     )
+
+    # Save the loaders to CSV files (30/06/2024)
+    save_loader_to_csv(train_loader, train_ds, 'train_loader.csv')
+    save_loader_to_csv(val_loader, val_ds, 'val_loader.csv')
+    save_loader_to_csv(test_loader, test_ds, 'test_loader.csv')
 
     return train_loader, val_loader, test_loader, test_ds
 
@@ -425,10 +523,49 @@ def mIoU(pred_mask, mask, n_classes, smooth=1e-10):
         return np.nanmean(iou_per_class)
 
 
-def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", device="cuda"):
-    print(f"Number of batches in loader: {len(loader)}")
+# 30/06/2024
+def save_predictions_as_imgs(test_loader, model, num_class, folder="saved_images/", device="cuda"):
+    print(f"Number of batches in loader: {len(test_loader)}")
     model.eval()
-    for idx, (img, mask) in enumerate(loader):
+
+    # Create the folder if it doesn't exist
+    os.makedirs(folder, exist_ok=True)
+
+    for batch_idx, (images, masks) in enumerate(test_loader):
+        images = images.to(device=device)
+
+        with torch.no_grad():
+            if num_class == 1:
+                preds = torch.sigmoid(model(images))
+                preds = (preds > 0.5).float()
+            else:
+                softmax = torch.nn.Softmax(dim=1)
+                preds = torch.argmax(softmax(model(images)), dim=1).float()
+
+        for idx in range(images.size(0)):
+            # Constructing a unique filename based on batch index and image index
+            filename = f"prediction_{batch_idx * test_loader.batch_size + idx}.png"
+
+            # Save original image
+            img_filename = f"img_{filename}"
+            save_image(images[idx], os.path.join(folder, img_filename))
+
+            # Save ground truth mask
+            mask_filename = f"mask_{filename}"
+            save_image(masks[idx], os.path.join(folder, mask_filename))
+
+            # Save predicted mask (or segmentation)
+            pred_filename = f"pred_{filename}"
+            save_image(preds[idx], os.path.join(folder, pred_filename))
+
+    model.train()
+
+
+def save_predictions_as_imgs_Original(test_loader, model, num_class, folder="saved_images/", device="cuda"):
+    print(f"Number of batches in loader: {len(test_loader)}")
+    model.eval()
+    for idx, (img, mask) in enumerate(test_loader):
+        print(f"Batch {idx}: img shape = {img.shape}, mask shape = {mask.shape}")
         img = img.to(device=device)
         with torch.no_grad():
             if num_class == 1:
@@ -443,18 +580,25 @@ def save_predictions_as_imgs(loader, model, num_class, folder="saved_images/", d
         torchvision.utils.save_image(img, f"{folder}/img_{idx}.png")
         torchvision.utils.save_image(preds, f"{folder}/pred_{idx}.png")"""
         for i in range(img.size(0)):
-            image_idx = idx * loader.batch_size + i  # Calculate global image index
+            image_idx = idx * test_loader.batch_size + i  # Calculate global image index
+            img_file = f"{folder}/img_{image_idx}.png"
+            mask_file = f"{folder}/mask_{image_idx}.png"
+            pred_file = f"{folder}/pred_{image_idx}.png"
+
+            print(f"Saving: {img_file}, {mask_file}, {pred_file}")
+
+            torchvision.utils.save_image(mask[i].unsqueeze(0), mask_file)
+            torchvision.utils.save_image(img[i], img_file)
+            torchvision.utils.save_image(preds[i], pred_file)
+            """
             torchvision.utils.save_image(mask[i].unsqueeze(0), f"{folder}/mask_{image_idx}.png")
             torchvision.utils.save_image(img[i], f"{folder}/img_{image_idx}.png")
-            torchvision.utils.save_image(preds[i], f"{folder}/pred_{image_idx}.png")
+            torchvision.utils.save_image(preds[i], f"{folder}/pred_{image_idx}.png")"""
 
     model.train()
 
-import os
-import uuid
 
-
-def save_and_log(image_tensor, filename):
+def save_and_logwandb(image_tensor, filename):
     plt.figure(figsize=(10, 10))
     plt.axis("off")
 
@@ -476,14 +620,83 @@ def save_and_log(image_tensor, filename):
     return filename  # Return the filename instead of wandb.Image object
 
 
-def save_table(loader, num_class, model, table_name, device):
+###################################### Test Test Test 30/06/2024 ##############################################
+def save_table(test_loader, num_class, model, save_folder, device):
+    print("Saving visual table........")
+    model.eval()  # Set model to evaluation mode
+
+    os.makedirs(save_folder, exist_ok=True)
+
+    with torch.no_grad():
+        for bx, (im, mask) in enumerate(tqdm(test_loader, total=len(test_loader))):
+            im = im.to(device=device)
+            mask = mask.to(device=device)
+
+            if num_class == 1:
+                pred_mask = torch.sigmoid(model(im))
+                pred_mask = (pred_mask > 0.5).float()
+            else:
+                softmax = nn.Softmax(dim=1)
+                pred_mask = torch.argmax(softmax(model(im)), axis=1)
+
+            # Create figure
+            fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+            fig.suptitle(f'Image {bx}', fontsize=16)
+
+            # Display original image
+            axs[0].imshow(make_grid(im[0], normalize=True).permute(1, 2, 0).cpu())
+            axs[0].set_title('Image')
+            axs[0].axis('off')
+
+            # Display original mask
+            axs[1].imshow(mask[0].squeeze().cpu(), cmap='gray')
+            axs[1].set_title('Mask')
+            axs[1].axis('off')
+
+            # Display predicted mask
+            axs[2].imshow(pred_mask[0].squeeze().cpu(), cmap='gray')
+            axs[2].set_title('Predicted Mask')
+            axs[2].axis('off')
+
+            # Save the figure
+            unique_id = uuid.uuid4().hex[:6]
+            plt.savefig(os.path.join(save_folder, f'segmentation_result_{bx}_{unique_id}.png'))
+            plt.close(fig)
+
+    model.train()  # Set model back to training mode
+
+    print(f"Visual table saved in {save_folder}")
+
+
+def save_and_log(tensor, filename):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    save_image(tensor, filename)
+    return filename
+
+
+def save_table_data_csv(data, filename):
+    with open(filename, 'w', newline='') as csvfile:
+        fieldnames = ['Original Image', 'Original Mask', 'Predicted Mask']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in data:
+            writer.writerow(row)
+
+
+def save_table_data_json(data, filename):
+    with open(filename, 'w') as jsonfile:
+        json.dump(data, jsonfile, indent=4)
+
+
+##################################################################################################################
+def save_tablewandb(test_loader, num_class, model, table_name, device):
     table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'])
     model.eval()  # Set model to evaluation mode
 
     temp_files = []  # List to keep track of temporary files
 
     with torch.no_grad():
-        for bx, (im, mask) in enumerate(tqdm(loader, total=len(loader))):
+        for bx, (im, mask) in enumerate(tqdm(test_loader, total=len(test_loader))):
             im = im.to(device=device)
             mask = mask.to(device=device)
 
@@ -528,7 +741,8 @@ def save_table(loader, num_class, model, table_name, device):
         except OSError:
             pass
 
-############################## Origninal (remove_Original) ######################################
+
+############################## Origninal (remove_Original) 30/06/2024 ######################################
 def save_table_Original(loader, num_class, model, table_name, device):
     table = wandb.Table(columns=['Original Image', 'Original Mask', 'Predicted Mask'], allow_mixed_types=False)
 

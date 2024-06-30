@@ -23,8 +23,15 @@ class Dataset(Dataset):
         return len(self.ds)
 
     def __getitem__(self, index):
-        img_path = os.path.join(self.img_path, self.images[index])
-        mask_path = os.path.join(self.mask_path, self.images[index].replace(".jpg", ".png"))
+        # Use the index to get the file name from the dataset split
+        img_file = self.ds[index] + ".jpg"  # Append the .jpg extension
+        mask_file = img_file.replace(".jpg", ".png")
+
+        img_path = os.path.join(self.img_path, img_file)
+        mask_path = os.path.join(self.mask_path, mask_file)
+
+        # img_path = os.path.join(self.img_path, self.images[index])
+        # mask_path = os.path.join(self.mask_path, self.images[index].replace(".jpg", ".png"))
 
         # Open the image
         image = Image.open(img_path)
@@ -60,11 +67,18 @@ class Dataset(Dataset):
             image = augmentations["image"]
             mask = augmentations["mask"]
 
+        # Ensure that the image and mask do not correspond
+        assert not np.array_equal(image, mask), "Image and mask should not correspond"
+
         return image, mask
+
+"""
+def get_filename(dataset, index):
+    return dataset.images[index]"""
 
 
 def get_filename(dataset, index):
-    return dataset.images[index]
+    return dataset.ds[index] + ".jpg"  # Append the .jpg extension
 
 
 """

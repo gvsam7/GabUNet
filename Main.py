@@ -225,6 +225,15 @@ def main():
         args.pin_memory,
     )
 
+    # Function to verify the test loader (29/06/2024)
+    def verify_test_loader(test_loader):
+        print(f"Number of batches in test loader: {len(test_loader)}")
+        for idx, (img, mask) in enumerate(test_loader):
+            print(f"Test batch {idx}: img shape = {img.shape}, mask shape = {mask.shape}")
+
+    # Example usage to check test loader
+    verify_test_loader(test_loader)
+
     # Load saved model
     if args.load_model == 'True':
         print(f"Load model is {args.load_model}")
