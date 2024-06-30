@@ -279,7 +279,7 @@ def main():
     test_accuracy(test_loader, model, device=device, num_class=args.num_class)
 
     # print some examples to a folder
-    save_predictions_as_imgs(test_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
+    # save_predictions_as_imgs(test_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
     wandb.save(os.path.join('saved_images', '*'))
 
     save_table(test_loader, args.num_class, model,  "Predictions", device)  # this was commented out
