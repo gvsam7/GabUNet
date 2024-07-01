@@ -231,8 +231,8 @@ def main():
         for idx, (img, mask) in enumerate(test_loader):
             print(f"Test batch {idx}: img shape = {img.shape}, mask shape = {mask.shape}")
 
-    # Example usage to check test loader
-    verify_test_loader(test_loader)
+    # Check test loader
+    # verify_test_loader(test_loader)
 
     # Load saved model
     if args.load_model == 'True':

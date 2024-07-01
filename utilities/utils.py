@@ -32,6 +32,7 @@ def load_checkpoint(checkpoint, model, optimizer):
     model.load_state_dict(checkpoint["state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer"])
 
+
 # 30/06/2024
 def save_loader_to_csv(loader, dataset, csv_filename):
     with open(csv_filename, mode='w', newline='') as file:
@@ -525,7 +526,7 @@ def mIoU(pred_mask, mask, n_classes, smooth=1e-10):
 
 # 30/06/2024
 def save_predictions_as_imgs(test_loader, model, num_class, folder="saved_images/", device="cuda"):
-    print(f"Number of batches in loader: {len(test_loader)}")
+    # print(f"Number of batches in loader: {len(test_loader)}")
     model.eval()
 
     # Create the folder if it doesn't exist
