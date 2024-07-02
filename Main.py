@@ -282,7 +282,7 @@ def main():
     # save_predictions_as_imgs(test_loader, model, num_class=args.num_class, folder="saved_images/", device=device)
     wandb.save(os.path.join('saved_images', '*'))
 
-    save_table(test_loader, args.num_class, model,  "Predictions", device)  # this was commented out
+    # save_table(test_loader, args.num_class, model,  "Predictions", device)  # this was commented out
     test_set = test_ds
 
     mob_miou = miou_score(model, test_set)
