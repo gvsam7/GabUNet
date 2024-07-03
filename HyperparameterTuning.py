@@ -122,10 +122,14 @@ def objective(trial):
         "lr": trial.suggest_float("lr", 1e-4, 1e-2, log=True),  # Narrowed range
         "optimizer": trial.suggest_categorical("optimizer", ["adam", "adamw"]),  # Reduced options
         "weight_decay": trial.suggest_float("weight_decay", 1e-5, 1e-3, log=True),  # Narrowed range
-        "epochs": 5,  # Fixed to 5 epochs
+        # "epochs": 5,  # Fixed to 5 epochs
+        "epochs": trial.suggest_int("epochs", 10, 100),  # Make sure this line is present
         "num_patches": (args.image_size // 16) ** 2,  # Using fixed patch_size of 16
         "num_channels": args.in_channels
     }
+
+    print("Config:", config)  # Print the entire config dictionary
+    print("Epochs:", config.get("epochs"))  # Print the epochs value specifically
 
     clear_wandb_cache()
     wandb.init(project="SemSeg", config=config)
@@ -249,7 +253,8 @@ def objective(trial):
 
     return val_acc"""
 
-    for epoch in range(config["epochs"]):
+    # for epoch in range(config["epochs"]):
+    for epoch in range(config.get("epochs", 10)):
         since = time.time()
         train_loss = train(train_loader, model, optimizer, criterion, scaler, args.num_class, device)
 
