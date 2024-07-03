@@ -76,7 +76,7 @@ def clear_wandb_cache():
 def objective(trial):
     args = arguments()
 
-    config = {
+    """config = {
         "image_size": trial.suggest_categorical("image_size", [256, 512, 1024]),
         "num_layers": trial.suggest_int("num_layers", 1, 5),
         "hidden_dim": trial.suggest_int("hidden_dim", 64, 512),
@@ -88,6 +88,42 @@ def objective(trial):
         "lr": trial.suggest_float("lr", 1e-5, 1e-3),
         "optimizer": trial.suggest_categorical("optimizer", ["adam", "sgd"]),
         "num_patches": (args.image_size // args.patch_size) ** 2,
+        "num_channels": args.in_channels
+    }"""
+
+# The Proper Run
+    """config = {
+        "image_size": trial.suggest_categorical("image_size", [256, 512, 1024]),
+        "num_layers": trial.suggest_int("num_layers", 1, 8),
+        "hidden_dim": trial.suggest_int("hidden_dim", 32, 512),
+        "mlp_dim": trial.suggest_int("mlp_dim", 64, 2048),
+        "num_heads": trial.suggest_int("num_heads", 1, 16),
+        "dropout_rate": trial.suggest_float("dropout_rate", 0.0, 0.5),
+        "patch_size": trial.suggest_categorical("patch_size", [8, 16, 32]),
+        "batch_size": trial.suggest_categorical("batch_size", [4, 8, 16, 32, 64]),
+        "lr": trial.suggest_float("lr", 1e-6, 1e-2, log=True),
+        "optimizer": trial.suggest_categorical("optimizer", ["adam", "sgd", "adamw"]),
+        "weight_decay": trial.suggest_float("weight_decay", 1e-8, 1e-3, log=True),
+        "epochs": trial.suggest_int("epochs", 10, 100),
+        "num_patches": (args.image_size // args.patch_size) ** 2,
+        "num_channels": args.in_channels
+    }"""
+
+    # The Test Run
+    config = {
+        "image_size": trial.suggest_categorical("image_size", [256, 512]),  # Reduced options
+        "num_layers": trial.suggest_int("num_layers", 1, 3),  # Narrowed range
+        "hidden_dim": trial.suggest_int("hidden_dim", 32, 128),  # Narrowed range
+        "mlp_dim": trial.suggest_int("mlp_dim", 64, 256),  # Narrowed range
+        "num_heads": trial.suggest_int("num_heads", 1, 4),  # Narrowed range
+        "dropout_rate": trial.suggest_float("dropout_rate", 0.1, 0.3),  # Narrowed range
+        "patch_size": 16,  # Fixed value
+        "batch_size": trial.suggest_categorical("batch_size", [8, 16]),  # Reduced options
+        "lr": trial.suggest_float("lr", 1e-4, 1e-2, log=True),  # Narrowed range
+        "optimizer": trial.suggest_categorical("optimizer", ["adam", "adamw"]),  # Reduced options
+        "weight_decay": trial.suggest_float("weight_decay", 1e-5, 1e-3, log=True),  # Narrowed range
+        "epochs": 5,  # Fixed to 5 epochs
+        "num_patches": (args.image_size // 16) ** 2,  # Using fixed patch_size of 16
         "num_channels": args.in_channels
     }
 
@@ -164,10 +200,17 @@ def objective(trial):
         criterion = nn.CrossEntropyLoss()
     print(f"criterion: {criterion}")
 
-    if config["optimizer"] == "adam":
+    """if config["optimizer"] == "adam":
         optimizer = optim.Adam(model.parameters(), lr=config["lr"])
     else:
-        optimizer = optim.SGD(model.parameters(), lr=config["lr"], momentum=0.9)
+        optimizer = optim.SGD(model.parameters(), lr=config["lr"], momentum=0.9)"""
+
+    if config["optimizer"] == "adam":
+        optimizer = optim.Adam(model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"])
+    elif config["optimizer"] == "sgd":
+        optimizer = optim.SGD(model.parameters(), lr=config["lr"], momentum=0.9, weight_decay=config["weight_decay"])
+    else:
+        optimizer = optim.AdamW(model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"])
 
     train_loader, val_loader, test_loader, test_ds = get_loaders(
         image_path,
@@ -185,7 +228,11 @@ def objective(trial):
 
     scaler = torch.cuda.amp.GradScaler()
 
-    for epoch in range(args.epochs):
+    best_val_acc = 0
+    patience = 10
+    patience_counter = 0
+
+    """for epoch in range(args.epochs):
         since = time.time()
         train(train_loader, model, optimizer, criterion, scaler, args.num_class, device)
 
@@ -200,10 +247,42 @@ def objective(trial):
         if trial.should_prune():
             raise optuna.exceptions.TrialPruned()
 
-    return val_acc
+    return val_acc"""
+
+    for epoch in range(config["epochs"]):
+        since = time.time()
+        train_loss = train(train_loader, model, optimizer, criterion, scaler, args.num_class, device)
+
+        val_acc = check_accuracy(val_loader, model, device=device, num_class=args.num_class)
+        if val_acc is None:
+            val_acc = 0.0  # Ensure val_acc is a float
+
+        print(f"Epoch:{epoch + 1}/{config['epochs']}.. "
+              f"Train loss: {train_loss:.3f}.. "
+              f"Val accuracy: {val_acc:.3f}.. "
+              f"Time: {(time.time() - since) / 60:.2f}m")
+
+        wandb.log({
+            "epoch": epoch,
+            "train_loss": train_loss,
+            "val_accuracy": val_acc,
+        })
+
+        trial.report(val_acc, epoch)
+
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            patience_counter = 0
+        else:
+            patience_counter += 1
+
+        if trial.should_prune() or patience_counter >= patience:
+            raise optuna.exceptions.TrialPruned()
+
+    return best_val_acc
 
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
     study.optimize(objective, n_trials=50, timeout=6000)  # Adjust n_trials and timeout as needed
 
@@ -211,4 +290,26 @@ if __name__ == "__main__":
     trial = study.best_trial
 
     print(f" Value: {trial.value}")
+    print(f" Params: {trial.params}")"""
+
+if __name__ == "__main__":
+    study = optuna.create_study(direction="maximize")
+    # study.optimize(objective, n_trials=100, timeout=72000)  # Increased trials and timeout
+    study.optimize(objective, n_trials=10, timeout=3600)  # 10 trials, 1 hour timeout
+
+    print("Best trial:")
+    trial = study.best_trial
+
+    print(f" Value: {trial.value}")
     print(f" Params: {trial.params}")
+
+    # Optuna visualization
+    import optuna.visualization as vis
+
+    plt.figure(figsize=(16, 9))
+    plot = vis.plot_optimization_history(study)
+    plot.show()
+
+    plt.figure(figsize=(16, 9))
+    plot = vis.plot_param_importances(study)
+    plot.show()
