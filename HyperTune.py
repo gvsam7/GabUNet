@@ -1,7 +1,7 @@
 """
 Author: Georgios Voulgaris
 Date: 09/07/2024
-Description: This script systematically tune the model's hyperparameters.
+Description: This script systematically tunes the model's hyperparameters.
             Hyperparameters to Tune:
             1. Learning Rate (--lr):
                 Range: 1𝑒−5 to 1𝑒−3.
@@ -30,6 +30,7 @@ Description: This script systematically tune the model's hyperparameters.
                 Range: 8 to 32.
                 Strategy: Smaller patches capture more fine-grained details but increase the number of patches, which
                 can slow down training.
+
         Suggested Tuning Strategy:
             1. Initial Setup:
                 - Begin with the default specified values.
@@ -196,7 +197,7 @@ def main():
             "num_channels": args.in_channels
         }
 
-        # Initialize wandb
+        # Initialise wandb
         clear_wandb_cache()
         wandb.init(project="SemSeg", config=args)
 
@@ -329,6 +330,7 @@ def main():
 
     print("Best Parameters:", best_params)
     print("Best Validation Loss:", best_val_loss)
+
 
 if __name__ == "__main__":
     main()
