@@ -1,17 +1,56 @@
 """
 Author: Georgios Voulgaris
-Date: 10/08/2022
-Description: This project is aiming to research water detection using semantic segmentation.
-             Data: The dataset is comprised of water body images (lakes, rivers) taken from unmanned aerial vehicles
-             (UAV).
-             The images were annotated using VGG Image Annotator (VIA). Then, from the created .json file masks, of the
-             water bodies were created.
-             Architecture: Initially, UNet is used to measure its performance, when trained on the water bodies dataset.
-             Measurements are in the form of:
-                1. visual inspection of the produced masks on test data,
-                2. per pixel accuracy,
-                3. Dice Score.
-             Aim: This is going to be a test platform of testing various architectures.
+Date: 09/07/2024
+Description: This script systematically tune the model's hyperparameters.
+            Hyperparameters to Tune:
+            1. Learning Rate (--lr):
+                Range: 1𝑒−5 to 1𝑒−3.
+                Strategy: Start with the default 1𝑒−4 and use a logarithmic scale to explore other values.
+            2. Batch Size (--batch-size):
+                Range: 8 to 64.
+                Strategy: Larger batch sizes can stabilise training but require more memory.
+            3. Number of Epochs (--epochs):
+                Range: 10 to 100 (depending on dataset size and training time constraints).
+                Strategy: Monitor validation loss/accuracy to determine the optimal number of epochs.
+            4. Number of Transformer Layers (--num-layers):
+                Range: 4 to 16.
+                Strategy: More layers can capture complex patterns but might lead to overfitting or longer training
+                          times.
+            5. Hidden Dimension (--hidden-dim):
+                Range: 256 to 1024.
+                Strategy: Higher dimensions can capture more features but increase computational cost.
+            6. Number of Attention Heads (--num-heads):
+                Range: 4 to 16.
+                Strategy: More heads can improve the model's ability to focus on different parts of the input but at the
+                          cost of increased computation.
+            7. Dropout Rate (--dropout-rate):
+                Range: 0.0 to 0.5.
+                Strategy: Helps prevent overfitting. Start with 0.1 and adjust based on validation performance.
+            8. Patch Size (--patch-size):
+                Range: 8 to 32.
+                Strategy: Smaller patches capture more fine-grained details but increase the number of patches, which
+                can slow down training.
+        Suggested Tuning Strategy:
+            1. Initial Setup:
+                - Begin with the default specified values.
+                - Train the model for a small number of epochs (e.g. 5-10) to get a baseline performance.
+            2. Learning Rate Search:
+                - Perform a logarithmic grid search over the learning rate range.
+                - Choose the learning rate that results in the lowest validation loss.
+            3. Batch Size and Number of Epochs:
+                - Fix the learning rate to the best value found.
+                - Experiment with different batch sizes and monitor memory usage and validation performance.
+                - Choose a batch size that maximises GPU utilisation without causing memory overflow.
+            4. Transformer Layers and Hidden Dimensions:
+                - Test different numbers of layers and hidden dimensions.
+                - Start with fewer layers and gradually increase.
+                - Observe the trade-off between model performance and training time.
+            5. Attention Heads and Dropout Rate:
+                - Experiment with the number of attention heads while keeping the dropout rate fixed.
+                - Adjust the dropout rate to see if it improves validation performance, especially if overfitting is
+                  observed.
+            6 Patch Size:
+                - Adjust the patch size to find the optimal balance between detail capture and computational efficiency.
 """
 
 import numpy as np
@@ -86,12 +125,39 @@ def clear_wandb_cache():
         print(f"Wandb cache directory not found: {cache_dir}")
 
 
-def train_and_validate_model(args):
-    # Your existing training and validation code here
+def train_and_validate_model(model, train_loader, val_loader, optimizer, criterion, device, args):
+    best_val_loss = float('inf')
+    for epoch in range(args.epochs):
+        model.train()
+        train_loss = 0.0
+        for batch_idx, (data, targets) in enumerate(train_loader):
+            data, targets = data.to(device), targets.to(device)
+            optimizer.zero_grad()
+            outputs = model(data)
+            loss = criterion(outputs, targets)
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item()
+        train_loss /= len(train_loader)
 
-    # Example placeholder code for validation loss
-    val_loss = 0.0  # Replace with actual validation loss computation
-    return val_loss
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for data, targets in val_loader:
+                data, targets = data.to(device), targets.to(device)
+                outputs = model(data)
+                loss = criterion(outputs, targets)
+                val_loss += loss.item()
+        val_loss /= len(val_loader)
+
+        print(f'Epoch {epoch+1}/{args.epochs}, Train Loss: {train_loss}, Val Loss: {val_loss}')
+
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            # Save the best model
+            torch.save(model.state_dict(), 'best_model.pth')
+
+    return best_val_loss
 
 
 def main():
