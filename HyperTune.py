@@ -174,6 +174,13 @@ def main():
     best_val_loss = float('inf')
     best_params = None
 
+    """
+    Grid Search: It uses itertools.product to generate all possible combinations of these hyperparameters. For each 
+    combination:
+        - It initialises the model with the specified hyperparameters.
+        - It trains the model on the training data and evaluates its performance on the validation data.
+        - It keeps track of the validation loss (or other specified metrics) for each combination.
+    """
     for lr, bs, nl, hd, nh, dr, ps in itertools.product(learning_rates, batch_sizes, num_layers, hidden_dims, num_heads,
                                                         dropout_rates, patch_sizes):
         args = arguments()
