@@ -57,6 +57,8 @@ class LogGaborConv2d(nn.Module):
 
         self.f0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define f0 as a parameter
 
+        self.theta0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define theta0 as a parameter
+
         self.x0 = Parameter(
             torch.ceil(torch.Tensor([self.kernel_size[0] / 2]))[0],
             requires_grad=False
@@ -86,6 +88,7 @@ class LogGaborConv2d(nn.Module):
         self.register_parameter("sigma", self.sigma)
         self.register_parameter("psi", self.psi)
         self.register_parameter("f0", self.f0)  # Register f0 as a parameter
+        self.register_parameter("theta0", self.theta0)  # Register f0 as a parameter
         self.register_parameter("x_shape", self.x0)
         self.register_parameter("y_shape", self.y0)
         self.register_parameter("x_grid", self.x)
@@ -110,12 +113,18 @@ class LogGaborConv2d(nn.Module):
                 theta = self.theta[i, j].expand_as(self.y)
                 psi = self.psi[i, j].expand_as(self.y)
                 f0 = self.f0.expand_as(self.y)  # Expand f0 accordingly
+                theta0 = self.theta0.expand_as(self.y)
 
                 rotx = self.x * torch.cos(theta) + self.y * torch.sin(theta)
                 roty = -self.x * torch.sin(theta) + self.y * torch.cos(theta)
 
                 r = torch.sqrt(rotx ** 2 + roty ** 2 + self.delta)
+                # Log-Gabor filter
+                # g = torch.exp(-1 * ((torch.log(r) - torch.log(f0)) / (2 * torch.log(sigma / f0))) ** 2)
+                # Bi-dimensional Log-Gabor filter
                 g = torch.exp(-1 * ((torch.log(r) - torch.log(f0)) / (2 * torch.log(sigma / f0))) ** 2)
+                g = g * torch.exp(-(theta - theta0) / (2 * sigma ** 2))  # Adjusted term
+
                 g = g * torch.cos(freq * r + psi)
                 g = g / (2 * math.pi * (sigma ** 2))
 
