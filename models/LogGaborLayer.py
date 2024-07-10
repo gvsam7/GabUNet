@@ -6,6 +6,10 @@ Description: This is a Log Gabor filter implementation in a convolutional layer.
              filter, the Log-Gabor filter does not have the same DC problem.
              Formula:
              G(f) = exp\left(-\frac{(\log(f/f_{0}))^2}{2(\log(\sigma/f_{0}))^2}\right)
+
+             Note: that a 2D expansion is added by adding another dimension, hence, the filter is not only designed for
+             a particular frequency, but also is designed for a particular orientation. The orientation component is a
+             Gaussian distance function according to the angle in polar coordinates.
 """
 
 
@@ -59,6 +63,7 @@ class LogGaborConv2d(nn.Module):
 
         self.theta0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define theta0 as a parameter
 
+        # Initialise grid parameters
         self.x0 = Parameter(
             torch.ceil(torch.Tensor([self.kernel_size[0] / 2]))[0],
             requires_grad=False
@@ -78,11 +83,13 @@ class LogGaborConv2d(nn.Module):
         self.x = Parameter(self.x)
         self.y = Parameter(self.y)
 
+        # Initialise filter weights
         self.weight = Parameter(
             torch.empty(self.conv.weight.shape, requires_grad=True),
             requires_grad=True
         )
 
+        # Register all parameters
         self.register_parameter("freq", self.freq)
         self.register_parameter("theta", self.theta)
         self.register_parameter("sigma", self.sigma)
