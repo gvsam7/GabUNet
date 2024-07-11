@@ -59,9 +59,14 @@ class LogGaborConv2d(nn.Module):
         self.sigma = Parameter(math.pi / self.freq, requires_grad=True)
         self.psi = Parameter(math.pi * torch.rand(out_channels, in_channels), requires_grad=True)
 
-        self.f0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define f0 as a parameter
+        # Modified: Create f0 and theta0 as learnable parameters for all channels
+        self.f0 = Parameter(torch.ones(out_channels, in_channels), requires_grad=True)
+        self.theta0 = Parameter(torch.ones(out_channels, in_channels), requires_grad=True)
 
-        self.theta0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define theta0 as a parameter
+
+        # self.f0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define f0 as a parameter
+
+        # self.theta0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define theta0 as a parameter
 
         # Initialise grid parameters
         self.x0 = Parameter(
@@ -119,8 +124,10 @@ class LogGaborConv2d(nn.Module):
                 freq = self.freq[i, j].expand_as(self.y)
                 theta = self.theta[i, j].expand_as(self.y)
                 psi = self.psi[i, j].expand_as(self.y)
-                f0 = self.f0.expand_as(self.y)  # Expand f0 accordingly
-                theta0 = self.theta0.expand_as(self.y)
+                # f0 = self.f0.expand_as(self.y)  # Expand f0 accordingly
+                # theta0 = self.theta0.expand_as(self.y)
+                f0 = self.f0[i, j].expand_as(self.y)
+                theta0 = self.theta0[i, j].expand_as(self.y)
 
                 rotx = self.x * torch.cos(theta) + self.y * torch.sin(theta)
                 roty = -self.x * torch.sin(theta) + self.y * torch.cos(theta)
@@ -129,8 +136,16 @@ class LogGaborConv2d(nn.Module):
                 # Log-Gabor filter
                 # g = torch.exp(-1 * ((torch.log(r) - torch.log(f0)) / (2 * torch.log(sigma / f0))) ** 2)
                 # Bi-dimensional Log-Gabor filter
-                g = torch.exp(-1 * ((torch.log(r) - torch.log(f0)) / (2 * torch.log(sigma / f0))) ** 2)
-                g = g * torch.exp(-(theta - theta0) / (2 * sigma ** 2))  # Adjusted term
+                # g = torch.exp(-1 * ((torch.log(r) - torch.log(f0)) / (2 * torch.log(sigma / f0))) ** 2)
+                # g = g * torch.exp(-(theta - theta0) / (2 * sigma ** 2))  # Adjusted term
+                # Log-Gabor filter (radial component)
+                g_radial = torch.exp(-1 * ((torch.log(r) - torch.log(f0)) / (2 * torch.log(sigma / f0))) ** 2)
+
+                # Angular component (squared as suggested)
+                g_angular = torch.exp(-((theta - theta0) ** 2) / (2 * sigma ** 2))
+
+                # Combine radial and angular components
+                g = g_radial * g_angular
 
                 g = g * torch.cos(freq * r + psi)
                 g = g / (2 * math.pi * (sigma ** 2))
