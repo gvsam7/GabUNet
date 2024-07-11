@@ -37,6 +37,9 @@ class AdaptiveMixPool(nn.Module):
         max_pool = F.max_pool2d(x, self.kernel_size, self.stride, self.padding)
         avg_pool = F.avg_pool2d(x, self.kernel_size, self.stride, self.padding)
 
+        # Ensure alpha has the same size as the pooled outputs
+        alpha = F.interpolate(alpha, size=max_pool.shape[2:], mode='nearest')
+
         # Use broadcasting to apply alpha
         mixed_pool = alpha * max_pool + (1 - alpha) * avg_pool
 
