@@ -124,8 +124,8 @@ class LogGaborConv2d(nn.Module):
                 freq = self.freq[i, j].expand_as(self.y)
                 theta = self.theta[i, j].expand_as(self.y)
                 psi = self.psi[i, j].expand_as(self.y)
-                # f0 = self.f0.expand_as(self.y)  # Expand f0 accordingly
-                # theta0 = self.theta0.expand_as(self.y)
+                # f0 = self.f0.expand_as(self.y)  # global values
+                # theta0 = self.theta0.expand_as(self.y)  # global values
                 f0 = self.f0[i, j].expand_as(self.y)
                 theta0 = self.theta0[i, j].expand_as(self.y)
 

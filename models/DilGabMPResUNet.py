@@ -12,18 +12,18 @@ class DilGabMPResUNet(nn.Module):
         # Encoder 1
         # self.conv11 = nn.Conv2d(in_channels, 64, kernel_size=3, padding=1)
         # self.conv11 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
-        # self.conv11 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
-        self.conv11 = EnhancedFrequencyLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1, num_scales=3)
+        self.conv11 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        # self.conv11 = EnhancedFrequencyLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1, num_scales=3)
         self.batchrelu = BatchNormReLU(64)
         self.conv12 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
         self.conv13 = nn.Conv2d(3, 64, kernel_size=1, padding=0)
 
         # Encoder 2 and 3
-        self.res2 = DilResBlockAMP(64, 128, stride=2)  # DilResBlockMP(64, 128, stride=2)
-        self.res3 = DilResBlockAMP(128, 256, stride=2)  # DilResBlockMP(128, 256, stride=2)
+        self.res2 = DilResBlockMP(64, 128, stride=2)  # DilResBlockAMP(64, 128, stride=2)
+        self.res3 = DilResBlockMP(128, 256, stride=2)  # DilResBlockAMP(128, 256, stride=2)
 
         # Bridge
-        self.res4 = DilResBlockAMP(256, 512, stride=2)  # DilResBlockMP(256, 512, stride=2)
+        self.res4 = DilResBlockMP(256, 512, stride=2)  # DilResBlockAMP(256, 512, stride=2)
 
         # Decoder
         self.dec1 = DilDecoder(512, 256)
