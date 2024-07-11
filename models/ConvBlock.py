@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 from models.GaborLayer import GaborConv2d
-from models.MixPool import MixPool
+from models.MixPool import MixPool, AdaptiveMixPool
 
 
 class DACBlock(nn.Module):
@@ -113,6 +113,42 @@ class ResBlockMP(nn.Module):
         x = self.bn2(x)
         x = self.conv2(x)
         s = self.skip(inputs)
+
+        skip = x + s
+        return skip
+
+
+# Addaptive Mix Pooling
+class DilResBlockAMP(nn.Module):
+    def __init__(self, in_channels, out_channels, stride=1):
+        super(DilResBlockAMP, self).__init__()
+
+        # Convolutional layer
+        self.bn1 = BatchNormReLU(in_channels)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=1)
+        self.amp1 = AdaptiveMixPool(kernel_size=2, stride=2, padding=0, in_channels=out_channels)
+
+        self.bn2 = BatchNormReLU(out_channels)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, stride=1)
+
+        # Dilated convolution
+        self.dil = DACBlock(out_channels, out_channels)
+
+        # Shortcut Connection (Identity Mapping)
+        self.skip_conv = nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=1)
+        self.skip_amp = AdaptiveMixPool(kernel_size=2, stride=2, padding=0, in_channels=out_channels)
+
+    def forward(self, inputs):
+        x = self.bn1(inputs)
+        x = self.conv1(x)
+        x = self.amp1(x)
+        x = self.bn2(x)
+        x = self.conv2(x)
+        # added dilated conv
+        x = self.dil(x)
+
+        s = self.skip_conv(inputs)
+        s = self.skip_amp(s)
 
         skip = x + s
         return skip

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from models.ConvBlock import BatchNormReLU, DilResBlockMP, DilDecoder, GaborConv2d
+from models.ConvBlock import BatchNormReLU, DilResBlockMP, DilDecoder, GaborConv2d, DilResBlockAMP
 from models.LogGaborLayer import LogGaborConv2d
 
 
@@ -18,11 +18,11 @@ class DilGabMPResUNet(nn.Module):
         self.conv13 = nn.Conv2d(3, 64, kernel_size=1, padding=0)
 
         # Encoder 2 and 3
-        self.res2 = DilResBlockMP(64, 128, stride=2)
-        self.res3 = DilResBlockMP(128, 256, stride=2)
+        self.res2 = DilResBlockAMP(64, 128, stride=2)  # DilResBlockMP(64, 128, stride=2)
+        self.res3 = DilResBlockAMP(128, 256, stride=2)  # DilResBlockMP(128, 256, stride=2)
 
         # Bridge
-        self.res4 = DilResBlockMP(256, 512, stride=2)
+        self.res4 = DilResBlockAMP(256, 512, stride=2)  # DilResBlockMP(256, 512, stride=2)
 
         # Decoder
         self.dec1 = DilDecoder(512, 256)
