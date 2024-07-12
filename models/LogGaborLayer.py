@@ -345,6 +345,8 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
         # Learnable frequency band selection
         freq_mask = torch.zeros((self.out_channels, self.in_channels, height, width), device=self.device)
+        # Debug print
+        print("freq_mask shape:", freq_mask.shape)
         for i in range(self.out_channels):
             for j in range(self.in_channels):
                 start, end = self.freq_band_select[i, j]
