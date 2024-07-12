@@ -317,6 +317,12 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
         # Frequency domain attention
         attention_weights = self.freq_attention(torch.abs(x_freq_shift))
+        # Debugging
+        print("x_freq_shift shape:", x_freq_shift.shape)
+        print("attention_weights shape:", attention_weights.shape)
+        for i, f in enumerate(filtered_outputs):
+            print(f"filtered_output[{i}] shape:", f.shape)
+
         attended_output = sum([w.unsqueeze(1).unsqueeze(-1).unsqueeze(-1) * f for w, f in zip(attention_weights.unbind(1), filtered_outputs)])
 
         # Learnable frequency band selection
