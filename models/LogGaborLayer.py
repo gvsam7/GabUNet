@@ -274,7 +274,7 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         self.freq_attention = nn.Sequential(
             nn.Conv2d(in_channels, 64, kernel_size=1),
             nn.ReLU(),
-            nn.Conv2d(64, num_scales, kernel_size=1),
+            nn.Conv2d(64, out_channels * num_scales, kernel_size=1),
             nn.Softmax(dim=1)
         ).to(device)
 
@@ -317,13 +317,22 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
         # Frequency domain attention
         attention_weights = self.freq_attention(torch.abs(x_freq_shift))
+        attention_weights = attention_weights.view(batch_size, self.num_scales, self.out_channels, 1, 1, 1)
+
         # Debugging
         print("x_freq_shift shape:", x_freq_shift.shape)
         print("attention_weights shape:", attention_weights.shape)
         for i, f in enumerate(filtered_outputs):
             print(f"filtered_output[{i}] shape:", f.shape)
 
-        attended_output = sum([w.unsqueeze(1).unsqueeze(-1).unsqueeze(-1) * f for w, f in zip(attention_weights.unbind(1), filtered_outputs)])
+        # Apply attention and sum
+        attended_output = torch.zeros_like(filtered_outputs[0])
+        for scale, (attention, filtered) in enumerate(zip(attention_weights.unbind(1), filtered_outputs)):
+            attended_output += attention * filtered
+
+        # Reshape attended_output to match x_freq_shift
+        attended_output = attended_output.sum(dim=1)  # Sum over out_channels
+        # attended_output = sum([w.unsqueeze(1).unsqueeze(-1).unsqueeze(-1) * f for w, f in zip(attention_weights.unbind(1), filtered_outputs)])
 
         # Learnable frequency band selection
         freq_mask = torch.zeros((self.out_channels, self.in_channels, height, width), device=self.device)
