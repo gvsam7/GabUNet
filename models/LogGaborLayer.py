@@ -364,10 +364,16 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         attended_output = attended_output * freq_mask"""
         freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1, -1)
         attended_output = attended_output.unsqueeze(1) * freq_mask.unsqueeze(2)
-
+        print("attended_output shape:", attended_output.shape)
+        
         # Convert back to spatial domain
         x_filtered = torch.fft.ifft2(torch.fft.ifftshift(attended_output)).real
-        print("x_filtered shape: ", x_filtered.shape)
+        print("x_filtered shape before reshape: ", x_filtered.shape)
+
+        # Adjust dimensions: sum over extra dimensions
+        x_filtered = x_filtered.sum(dim=(2, 3))  # Sum over the extra dimensions
+
+        print("x_filtered shape after sum:", x_filtered.shape)
 
         # Reshape x_filtered to match x_spatial
         x_filtered = x_filtered.view(batch_size, self.out_channels, height, width)
