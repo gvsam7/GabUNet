@@ -354,8 +354,10 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
                 end_idx = int((end + 1) / 2 * height)
                 freq_mask[i, j, start_idx:end_idx, start_idx:end_idx] = 1
         if freq_mask.dim() == 3:
+            print("freq_mask dim is 3")
             freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1)
         elif freq_mask.dim() == 4:
+            print("freq_mask dim is 3")
             freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1, -1)
         attended_output = attended_output * freq_mask
 
