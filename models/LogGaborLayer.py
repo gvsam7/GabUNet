@@ -251,7 +251,7 @@ class FrequencyLogGaborConv2d(nn.Module):
 
 class EnhancedFrequencyLogGaborConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False,
-                 padding_mode="zeros", num_scales=3):
+                 padding_mode="zeros", num_scales=3, device='cuda'):
         super(EnhancedFrequencyLogGaborConv2d, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -261,13 +261,14 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         self.dilation = dilation
         self.groups = groups
         self.num_scales = num_scales
+        self.device = device
 
         # Multi-scale Log Gabor parameters
-        self.freq = nn.Parameter(torch.rand(num_scales, out_channels, in_channels) * math.pi)
-        self.theta = nn.Parameter(torch.rand(num_scales, out_channels, in_channels) * math.pi)
-        self.sigma = nn.Parameter(torch.rand(num_scales, out_channels, in_channels) * math.pi)
-        self.f0 = nn.Parameter(torch.ones(num_scales, out_channels, in_channels))
-        self.theta0 = nn.Parameter(torch.ones(num_scales, out_channels, in_channels))
+        self.freq = nn.Parameter(torch.rand(num_scales, out_channels, in_channels, device=device) * math.pi)
+        self.theta = nn.Parameter(torch.rand(num_scales, out_channels, in_channels, device=device) * math.pi)
+        self.sigma = nn.Parameter(torch.rand(num_scales, out_channels, in_channels, device=device) * math.pi)
+        self.f0 = nn.Parameter(torch.ones(num_scales, out_channels, in_channels, device=device))
+        self.theta0 = nn.Parameter(torch.ones(num_scales, out_channels, in_channels, device=device))
 
         # Frequency domain attention
         self.freq_attention = nn.Sequential(
@@ -275,19 +276,20 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
             nn.ReLU(),
             nn.Conv2d(64, num_scales, kernel_size=1),
             nn.Softmax(dim=1)
-        )
+        ).to(device)
 
         # Adaptive frequency-spatial mixing
-        self.mixing_param = nn.Parameter(torch.rand(1))
+        self.mixing_param = nn.Parameter(torch.rand(1, device=device))
 
         # Learnable frequency band selection
-        self.freq_band_select = nn.Parameter(torch.rand(out_channels, in_channels, 2))  # Start and end of band
+        self.freq_band_select = nn.Parameter(torch.rand(out_channels, in_channels, 2, device=device))
 
         # Spatial convolution
-        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias, padding_mode)
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias, padding_mode).to(device)
 
     def get_log_gabor_filter(self, scale, i, j, size):
-        y, x = torch.meshgrid([torch.linspace(-1, 1, size[0]), torch.linspace(-1, 1, size[1])])
+        y, x = torch.meshgrid([torch.linspace(-1, 1, size[0], device=self.device),
+                               torch.linspace(-1, 1, size[1], device=self.device)])
         r = torch.sqrt(x**2 + y**2 + self.freq.data.new_tensor(1e-6))
         phi = torch.atan2(y, x)
 
@@ -297,6 +299,7 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         return log_gabor * angular
 
     def forward(self, x):
+        x = x.to(self.device)
         batch_size, _, height, width = x.shape
 
         # Convert to frequency domain
@@ -337,3 +340,7 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         output = self.mixing_param * x_filtered + (1 - self.mixing_param) * x_spatial
 
         return output
+
+    def to(self, device):
+        self.device = device
+        return super(EnhancedFrequencyLogGaborConv2d, self).to(device)
