@@ -333,9 +333,11 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
             print(f"filtered_output[{i}] shape:", f.shape)
 
         # Apply attention and sum
-        attended_output = torch.zeros_like(filtered_outputs[0])
+        attended_output = torch.zeros_like(x_freq_shift)
         for scale, (attention, filtered) in enumerate(zip(attention_weights.unbind(1), filtered_outputs)):
-            attended_output += attention.unsqueeze(1) * filtered
+            # Reshape attention to match filtered
+            attention = attention.unsqueeze(2).expand(-1, -1, 3, -1, -1)
+            attended_output += (attention * filtered).sum(dim=1)
 
         # Reshape attended_output to match x_freq_shift
         attended_output = attended_output.sum(dim=1)  # Sum over out_channels
