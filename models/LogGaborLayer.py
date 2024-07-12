@@ -351,7 +351,11 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
                 start_idx = int((start + 1) / 2 * height)
                 end_idx = int((end + 1) / 2 * height)
                 freq_mask[i, j, start_idx:end_idx, start_idx:end_idx] = 1
-        attended_output = attended_output * freq_mask.unsqueeze(0)
+        if freq_mask.dim() == 3:
+            freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1)
+        elif freq_mask.dim() == 4:
+            freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1, -1)
+        attended_output = attended_output * freq_mask
 
         # Convert back to spatial domain
         x_filtered = torch.fft.ifft2(torch.fft.ifftshift(attended_output)).real
