@@ -171,7 +171,7 @@ class FrequencyLogGaborConv2d(nn.Module):
         self.f0 = nn.Parameter(torch.ones(out_channels, in_channels))
         self.theta0 = nn.Parameter(torch.ones(out_channels, in_channels))
 
-        # Initialize grid parameters
+        # Initialise grid parameters
         self.x0 = nn.Parameter(torch.ceil(torch.Tensor([self.kernel_size[0] / 2]))[0], requires_grad=False)
         self.y0 = nn.Parameter(torch.ceil(torch.Tensor([self.kernel_size[1] / 2]))[0], requires_grad=False)
 
@@ -249,6 +249,29 @@ class FrequencyLogGaborConv2d(nn.Module):
         return x_filtered
 
 
+"""
+Overview of the EnhancedFrequencyLogGaborConv2d class:
+    - Initialisation (init):
+        - Sets up parameters for multi-scale Log Gabor filters.
+        - Creates a frequency domain attention mechanism.
+        - Initialises adaptive frequency-spatial mixing.
+        - Sets up learnable frequency band selection.
+        - Creates a spatial convolution layer. 
+        
+    - Log Gabor Filter Generation (get_log_gabor_filter):
+        - Creates Log Gabor filters in the frequency domain for different scales.
+    
+    - Forward Pass (forward):
+        - Converts input to frequency domain.
+        - Applies multi-scale Log Gabor filtering.
+        - Applies frequency domain attention.
+        - Performs learnable frequency band selection.
+        - Converts back to spatial domain.
+        - Applies spatial convolution.
+        - Mixes frequency and spatial domain results.
+"""
+
+
 class EnhancedFrequencyLogGaborConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False,
                  padding_mode="zeros", num_scales=3, device='cuda'):
@@ -318,12 +341,6 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
         # Frequency domain attention
         attention_weights = self.freq_attention(torch.abs(x_freq_shift))
-        # Debug Print Statements
-        print("batch_size:", batch_size)
-        print("self.num_scales:", self.num_scales)
-        print("self.out_channels:", self.out_channels)
-        print("attention_weights shape:", attention_weights.shape)
-        print("attention_weights size:", attention_weights.numel())
         attention_weights = attention_weights.view(batch_size, self.num_scales, self.out_channels, height, width)
 
         # Apply attention and sum
