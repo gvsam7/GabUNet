@@ -326,14 +326,7 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         print("attention_weights size:", attention_weights.numel())
         attention_weights = attention_weights.view(batch_size, self.num_scales, self.out_channels, height, width)
 
-        # Debugging
-        print("x_freq_shift shape:", x_freq_shift.shape)
-        print("attention_weights shape:", attention_weights.shape)
-        for i, f in enumerate(filtered_outputs):
-            print(f"filtered_output[{i}] shape:", f.shape)
-
         # Apply attention and sum
-        # attended_output = torch.zeros_like(x_freq_shift)
         attended_output = torch.zeros_like(x_freq_shift, dtype=torch.complex64)
 
         for scale, (attention, filtered) in enumerate(zip(attention_weights.unbind(1), filtered_outputs)):
@@ -343,45 +336,29 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
         # Reshape attended_output to match x_freq_shift
         attended_output = attended_output.sum(dim=1)  # Sum over out_channels
-        # attended_output = sum([w.unsqueeze(1).unsqueeze(-1).unsqueeze(-1) * f for w, f in zip(attention_weights.unbind(1), filtered_outputs)])
 
         # Learnable frequency band selection
         freq_mask = torch.zeros((self.out_channels, self.in_channels, height, width), device=self.device)
-        # Debug print
-        print("freq_mask shape:", freq_mask.shape)
         for i in range(self.out_channels):
             for j in range(self.in_channels):
                 start, end = self.freq_band_select[i, j]
                 start_idx = int((start + 1) / 2 * height)
                 end_idx = int((end + 1) / 2 * height)
                 freq_mask[i, j, start_idx:end_idx, start_idx:end_idx] = 1
-        """if freq_mask.dim() == 3:
-            print("freq_mask dim is 3")
-            freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1)
-        elif freq_mask.dim() == 4:
-            print("freq_mask dim is 4")
-            freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1, -1)
-        attended_output = attended_output * freq_mask"""
         freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1, -1)
         attended_output = attended_output.unsqueeze(1) * freq_mask.unsqueeze(2)
-        print("attended_output shape:", attended_output.shape)
-        
+
         # Convert back to spatial domain
         x_filtered = torch.fft.ifft2(torch.fft.ifftshift(attended_output)).real
-        print("x_filtered shape before reshape: ", x_filtered.shape)
 
         # Adjust dimensions: sum over extra dimensions
         x_filtered = x_filtered.sum(dim=(2, 3))  # Sum over the extra dimensions
 
-        print("x_filtered shape after sum:", x_filtered.shape)
-
         # Reshape x_filtered to match x_spatial
         x_filtered = x_filtered.view(batch_size, self.out_channels, height, width)
-        print("x_filtered shape after reshape:", x_filtered.shape)
 
         # Spatial domain convolution
         x_spatial = self.conv(x)
-        print("x_spatial shape:", x_spatial.shape)
 
         # Adaptive frequency-spatial mixing
         output = self.mixing_param * x_filtered + (1 - self.mixing_param) * x_spatial
