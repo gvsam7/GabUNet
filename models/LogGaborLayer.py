@@ -324,7 +324,7 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         print("self.out_channels:", self.out_channels)
         print("attention_weights shape:", attention_weights.shape)
         print("attention_weights size:", attention_weights.numel())
-        attention_weights = attention_weights.view(batch_size, self.num_scales, self.out_channels, 256, 256)
+        attention_weights = attention_weights.view(batch_size, self.num_scales, self.out_channels, height, width)
 
         # Debugging
         print("x_freq_shift shape:", x_freq_shift.shape)
@@ -353,13 +353,15 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
                 start_idx = int((start + 1) / 2 * height)
                 end_idx = int((end + 1) / 2 * height)
                 freq_mask[i, j, start_idx:end_idx, start_idx:end_idx] = 1
-        if freq_mask.dim() == 3:
+        """if freq_mask.dim() == 3:
             print("freq_mask dim is 3")
             freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1)
         elif freq_mask.dim() == 4:
             print("freq_mask dim is 4")
             freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1, -1)
-        attended_output = attended_output * freq_mask
+        attended_output = attended_output * freq_mask"""
+        freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1, -1)
+        attended_output = attended_output.unsqueeze(1) * freq_mask
 
         # Convert back to spatial domain
         x_filtered = torch.fft.ifft2(torch.fft.ifftshift(attended_output)).real
