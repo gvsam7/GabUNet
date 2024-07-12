@@ -60,13 +60,11 @@ class LogGaborConv2d(nn.Module):
         self.psi = Parameter(math.pi * torch.rand(out_channels, in_channels), requires_grad=True)
 
         # Modified: Create f0 and theta0 as learnable parameters for all channels
-        self.f0 = Parameter(torch.ones(out_channels, in_channels), requires_grad=True)
-        self.theta0 = Parameter(torch.ones(out_channels, in_channels), requires_grad=True)
-
-
-        # self.f0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define f0 as a parameter
-
-        # self.theta0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define theta0 as a parameter
+        # self.f0 = Parameter(torch.ones(out_channels, in_channels), requires_grad=True)
+        # self.theta0 = Parameter(torch.ones(out_channels, in_channels), requires_grad=True)
+        # Global
+        self.f0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define f0 as a parameter
+        self.theta0 = Parameter(torch.Tensor([1.0]), requires_grad=True)  # Define theta0 as a parameter
 
         # Initialise grid parameters
         self.x0 = Parameter(
@@ -124,10 +122,10 @@ class LogGaborConv2d(nn.Module):
                 freq = self.freq[i, j].expand_as(self.y)
                 theta = self.theta[i, j].expand_as(self.y)
                 psi = self.psi[i, j].expand_as(self.y)
-                # f0 = self.f0.expand_as(self.y)  # global values
-                # theta0 = self.theta0.expand_as(self.y)  # global values
-                f0 = self.f0[i, j].expand_as(self.y)
-                theta0 = self.theta0[i, j].expand_as(self.y)
+                f0 = self.f0.expand_as(self.y)  # global values
+                theta0 = self.theta0.expand_as(self.y)  # global values
+                # f0 = self.f0[i, j].expand_as(self.y)
+                # theta0 = self.theta0[i, j].expand_as(self.y)
 
                 rotx = self.x * torch.cos(theta) + self.y * torch.sin(theta)
                 roty = -self.x * torch.sin(theta) + self.y * torch.cos(theta)
