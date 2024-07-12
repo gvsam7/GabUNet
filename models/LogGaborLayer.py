@@ -289,7 +289,8 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
     def get_log_gabor_filter(self, scale, size):
         y, x = torch.meshgrid([torch.linspace(-1, 1, size[0], device=self.device),
-                               torch.linspace(-1, 1, size[1], device=self.device)])
+                               torch.linspace(-1, 1, size[1], device=self.device)],
+                              indexing='ij')
         r = torch.sqrt(x**2 + y**2 + 1e-6)
         phi = torch.atan2(y, x)
 
@@ -323,7 +324,7 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         print("self.out_channels:", self.out_channels)
         print("attention_weights shape:", attention_weights.shape)
         print("attention_weights size:", attention_weights.numel())
-        attention_weights = attention_weights.view(batch_size, self.num_scales, self.out_channels, 1, 1, 1)
+        attention_weights = attention_weights.view(batch_size, self.num_scales, self.out_channels, 256, 256)
 
         # Debugging
         print("x_freq_shift shape:", x_freq_shift.shape)
@@ -334,7 +335,7 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         # Apply attention and sum
         attended_output = torch.zeros_like(filtered_outputs[0])
         for scale, (attention, filtered) in enumerate(zip(attention_weights.unbind(1), filtered_outputs)):
-            attended_output += attention * filtered
+            attended_output += attention.unsqueeze(1) * filtered
 
         # Reshape attended_output to match x_freq_shift
         attended_output = attended_output.sum(dim=1)  # Sum over out_channels
