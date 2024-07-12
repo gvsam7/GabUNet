@@ -287,14 +287,16 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         # Spatial convolution
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias, padding_mode).to(device)
 
-    def get_log_gabor_filter(self, scale, i, j, size):
+    def get_log_gabor_filter(self, scale, size):
         y, x = torch.meshgrid([torch.linspace(-1, 1, size[0], device=self.device),
                                torch.linspace(-1, 1, size[1], device=self.device)])
-        r = torch.sqrt(x**2 + y**2 + self.freq.data.new_tensor(1e-6))
+        r = torch.sqrt(x**2 + y**2 + 1e-6)
         phi = torch.atan2(y, x)
 
-        log_gabor = torch.exp(-((torch.log(r) - torch.log(self.f0[scale, i, j]))**2) / (2 * (torch.log(self.sigma[scale, i, j]))**2))
-        angular = torch.exp(-((phi - self.theta[scale, i, j])**2) / (2 * self.theta0[scale, i, j]**2))
+        log_gabor = torch.exp(-((torch.log(r.unsqueeze(0).unsqueeze(0) - torch.log(self.f0[scale, :, :].unsqueeze(-1).unsqueeze(-1))))**2) /
+                               (2 * (torch.log(self.sigma[scale, :, :].unsqueeze(-1).unsqueeze(-1)))**2))
+        angular = torch.exp(-((phi.unsqueeze(0).unsqueeze(0) - self.theta[scale, :, :].unsqueeze(-1).unsqueeze(-1))**2) /
+                            (2 * self.theta0[scale, :, :].unsqueeze(-1).unsqueeze(-1)**2))
 
         return log_gabor * angular
 
@@ -309,26 +311,23 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         # Multi-scale Log Gabor filtering in frequency domain
         filtered_outputs = []
         for scale in range(self.num_scales):
-            scale_filter = torch.stack([self.get_log_gabor_filter(scale, i, j, (height, width))
-                                        for i in range(self.out_channels)
-                                        for j in range(self.in_channels)])
-            scale_filter = scale_filter.view(self.out_channels, self.in_channels, height, width)
-            filtered = x_freq_shift * scale_filter.unsqueeze(0)
+            scale_filter = self.get_log_gabor_filter(scale, (height, width))
+            filtered = x_freq_shift.unsqueeze(1) * scale_filter.unsqueeze(0)
             filtered_outputs.append(filtered)
 
         # Frequency domain attention
         attention_weights = self.freq_attention(torch.abs(x_freq_shift))
-        attended_output = sum([w * f for w, f in zip(attention_weights.unbind(1), filtered_outputs)])
+        attended_output = sum([w.unsqueeze(1).unsqueeze(-1).unsqueeze(-1) * f for w, f in zip(attention_weights.unbind(1), filtered_outputs)])
 
         # Learnable frequency band selection
-        freq_mask = torch.zeros_like(attended_output)
+        freq_mask = torch.zeros((self.out_channels, self.in_channels, height, width), device=self.device)
         for i in range(self.out_channels):
             for j in range(self.in_channels):
                 start, end = self.freq_band_select[i, j]
                 start_idx = int((start + 1) / 2 * height)
                 end_idx = int((end + 1) / 2 * height)
                 freq_mask[i, j, start_idx:end_idx, start_idx:end_idx] = 1
-        attended_output = attended_output * freq_mask
+        attended_output = attended_output * freq_mask.unsqueeze(0)
 
         # Convert back to spatial domain
         x_filtered = torch.fft.ifft2(torch.fft.ifftshift(attended_output)).real
