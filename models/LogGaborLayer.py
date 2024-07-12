@@ -367,9 +367,11 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
         # Convert back to spatial domain
         x_filtered = torch.fft.ifft2(torch.fft.ifftshift(attended_output)).real
+        print("x_filtered shape: ", x_filtered.shape)
 
         # Spatial domain convolution
         x_spatial = self.conv(x)
+        print("x_spatial shape:", x_spatial.shape)
 
         # Adaptive frequency-spatial mixing
         output = self.mixing_param * x_filtered + (1 - self.mixing_param) * x_spatial
