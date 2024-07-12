@@ -317,6 +317,12 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
         # Frequency domain attention
         attention_weights = self.freq_attention(torch.abs(x_freq_shift))
+        # Debug Print Statements
+        print("batch_size:", batch_size)
+        print("self.num_scales:", self.num_scales)
+        print("self.out_channels:", self.out_channels)
+        print("attention_weights shape:", attention_weights.shape)
+        print("attention_weights size:", attention_weights.numel())
         attention_weights = attention_weights.view(batch_size, self.num_scales, self.out_channels, 1, 1, 1)
 
         # Debugging
