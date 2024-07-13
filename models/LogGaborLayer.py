@@ -274,7 +274,7 @@ Overview of the EnhancedFrequencyLogGaborConv2d class:
 
 
 class EnhancedFrequencyLogGaborConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False,
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, dilation=1, groups=1, bias=False,
                  padding_mode="zeros", num_scales=3, device='cuda'):
         super(EnhancedFrequencyLogGaborConv2d, self).__init__()
         self.in_channels = in_channels
