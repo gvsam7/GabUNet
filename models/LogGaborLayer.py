@@ -17,6 +17,7 @@ import torch
 from torch import nn
 from torch.nn import Parameter
 import math
+import torch.nn.functional as F
 
 
 class LogGaborConv2d(nn.Module):
