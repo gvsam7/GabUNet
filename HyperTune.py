@@ -367,9 +367,8 @@ def save_best_params_to_csv(best_params, best_val_loss, filename='best_params.cs
     print(f'Saved best parameters to {filename}')
 
     # Save CSV file to wandb
-    artifact = wandb.Artifact('best_params', type='hyperparameters')
-    artifact.add_file(filename)
-    wandb.log_artifact(artifact)
+    # Save the CSV file to wandb
+    wandb.save(filename)
 
     print("Best Parameters:", best_params)
     print("Best Validation Loss:", best_val_loss)
