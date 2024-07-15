@@ -133,7 +133,7 @@ def train_and_validate_model(model, train_loader, val_loader, optimizer, criteri
         model.train()
         train_loss = 0.0
         for batch_idx, (data, targets) in enumerate(train_loader):
-            data, targets = data.to(device), targets.to(device)
+            data, targets = data.to(device), targets.to(device).long()
             optimizer.zero_grad()
             outputs = model(data)
             loss = criterion(outputs, targets)
@@ -146,7 +146,7 @@ def train_and_validate_model(model, train_loader, val_loader, optimizer, criteri
         val_loss = 0.0
         with torch.no_grad():
             for data, targets in val_loader:
-                data, targets = data.to(device), targets.to(device)
+                data, targets = data.to(device), targets.to(device).long()
                 outputs = model(data)
                 loss = criterion(outputs, targets)
                 val_loss += loss.item()
@@ -330,7 +330,7 @@ def main():
                 }
                 save_checkpoint(checkpoint)
             epoch_time_elapsed = time.time() - since
-            print(f'Epoch {epoch} complete in {epoch_time_elapsed // 60:.0f}m {epoch_time_elapsed % 60:.0f}s')
+            print(f'Epoch {epoch+1} complete in {epoch_time_elapsed // 60:.0f}m {epoch_time_elapsed % 60:.0f}s')
 
         # save_predictions_as_imgs(
         #     test_loader, model, folder="saved_images/", device=device, num_class=args.num_class
