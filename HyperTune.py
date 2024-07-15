@@ -332,11 +332,11 @@ def main():
             epoch_time_elapsed = time.time() - since
             print(f'Epoch {epoch} complete in {epoch_time_elapsed // 60:.0f}m {epoch_time_elapsed % 60:.0f}s')
 
-        save_predictions_as_imgs(
-            test_loader, model, folder="saved_images/", device=device, num_class=args.num_class
-        )
+        # save_predictions_as_imgs(
+        #     test_loader, model, folder="saved_images/", device=device, num_class=args.num_class
+        # )
 
-        test_accuracy(test_loader, model, device, args.num_class)
+        # test_accuracy(test_loader, model, device, args.num_class)
 
         val_loss = train_and_validate_model(model, train_loader, val_loader, optimizer, criterion, device, args)
 
