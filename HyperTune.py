@@ -344,6 +344,33 @@ def main():
             best_val_loss = val_loss
             best_params = (lr, bs, nl, hd, nh, dr, ps)
 
+            # Track best validation loss and corresponding parameters
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_params = (lr, bs, nl, hd, nh, dr, ps)
+
+        # After hyperparameter tuning is complete
+        # Save best parameters to CSV file
+        save_best_params_to_csv(best_params, best_val_loss)
+
+
+def save_best_params_to_csv(best_params, best_val_loss, filename='best_params.csv'):
+    header = ['Learning Rate', 'Batch Size', 'Num Layers', 'Hidden Dim', 'Num Heads', 'Dropout Rate', 'Patch Size',
+              'Validation Loss']
+    data = list(best_params) + [best_val_loss]
+
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(header)
+        writer.writerow(data)
+
+    print(f'Saved best parameters to {filename}')
+
+    # Save CSV file to wandb
+    artifact = wandb.Artifact('best_parameters', type='hyperparameters')
+    artifact.add_file(filename)
+    wandb.log_artifact(artifact)
+
     print("Best Parameters:", best_params)
     print("Best Validation Loss:", best_val_loss)
 
