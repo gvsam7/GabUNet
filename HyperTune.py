@@ -164,21 +164,22 @@ def train_and_validate_model(model, train_loader, val_loader, optimizer, criteri
 
 def main():
     # Define hyperparameter search space
-    # learning_rates = [1e-5, 1e-4, 1e-3]
-    # batch_sizes = [8, 16, 32]
-    # num_layers = [8, 12, 16]
-    # hidden_dims = [512, 768, 1024]
-    # num_heads = [8, 12, 16]
-    # dropout_rates = [0.1, 0.3, 0.5]
-    # patch_sizes = [8, 16, 32]
+    learning_rates = [1e-5, 1e-4, 1e-3]
+    batch_sizes = [8, 16, 32]
+    num_layers = [8, 12, 16]
+    hidden_dims = [512, 768, 1024]
+    num_heads = [8, 12, 16]
+    dropout_rates = [0.1, 0.3, 0.5]
+    patch_sizes = [8, 16, 32]
 
-    learning_rates = [1e-4]
-    batch_sizes = [4]
-    num_layers = [8]
-    hidden_dims = [512]
-    num_heads = [8]
-    dropout_rates = [0.1]
-    patch_sizes = [8]
+    # Test Hyperparameters
+    # learning_rates = [1e-4]
+    # batch_sizes = [4]
+    # num_layers = [8]
+    # hidden_dims = [512]
+    # num_heads = [8]
+    # dropout_rates = [0.1]
+    # patch_sizes = [8]
 
     best_val_loss = float('inf')
     best_params = None
@@ -227,9 +228,13 @@ def main():
         df = dataframe(image_path)
         print(f'Total Images: {len(df)}')
 
+        # Data split Test
+        # X_trainval, X_test = train_test_split(df['id'].values[:100], test_size=0.1, random_state=args.random_state)
+        # X_train, X_val = train_test_split(X_trainval[:90], test_size=0.15, random_state=args.random_state)
+
         # Data split
-        X_trainval, X_test = train_test_split(df['id'].values[:100], test_size=0.1, random_state=args.random_state)
-        X_train, X_val = train_test_split(X_trainval[:90], test_size=0.15, random_state=args.random_state)
+        X_trainval, X_test = train_test_split(df['id'].values, test_size=0.1, random_state=args.random_state)
+        X_train, X_val = train_test_split(X_trainval, test_size=0.15, random_state=args.random_state)
 
         def check_data_split_overlap(X_train, X_val, X_test):
             train_set = set(X_train)
