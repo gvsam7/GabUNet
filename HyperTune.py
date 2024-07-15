@@ -228,8 +228,8 @@ def main():
         print(f'Total Images: {len(df)}')
 
         # Data split
-        X_trainval, X_test = train_test_split(df['id'].values, test_size=0.1, random_state=args.random_state)
-        X_train, X_val = train_test_split(X_trainval, test_size=0.15, random_state=args.random_state)
+        X_trainval, X_test = train_test_split(df['id'].values[:100], test_size=0.1, random_state=args.random_state)
+        X_train, X_val = train_test_split(X_trainval[:90], test_size=0.15, random_state=args.random_state)
 
         def check_data_split_overlap(X_train, X_val, X_test):
             train_set = set(X_train)
