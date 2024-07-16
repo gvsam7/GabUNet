@@ -299,6 +299,7 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
             nn.Conv2d(in_channels, 64, kernel_size=1),
             nn.ReLU(),
             nn.Conv2d(64, out_channels * num_scales, kernel_size=1),
+            nn.BatchNorm2d(out_channels * num_scales),
             nn.Softmax(dim=1)
         ).to(device)
 
@@ -350,7 +351,10 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         theta0 = self.theta0[scale, :, :].unsqueeze(-1).unsqueeze(-1)
         freq = self.freq[scale, :, :].unsqueeze(-1).unsqueeze(-1)
 
-        log_gabor = torch.exp(-((torch.log(r) - torch.log(f0)) ** 2) / (2 * (torch.log(sigma / f0)) ** 2))
+        # log_gabor = torch.exp(-((torch.log(r) - torch.log(f0)) ** 2) / (2 * (torch.log(sigma / f0)) ** 2))
+        log_gabor = torch.exp(-((torch.log(r.to(self.device)) - torch.log(f0.to(self.device))) ** 2) / (
+                    2 * (torch.log(sigma.to(self.device) / f0.to(self.device))) ** 2))  # 16_07_2024
+
         angular = torch.exp(-((phi - theta) ** 2) / (2 * theta0 ** 2))
 
         g = log_gabor * angular
@@ -364,7 +368,8 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         batch_size, _, height, width = x.shape
 
         # Convert to frequency domain
-        x_freq = torch.fft.fft2(x)
+        # x_freq = torch.fft.fft2(x)
+        x_freq = torch.fft.fft2(x.to(self.device))  # 16_07_2024
         x_freq_shift = torch.fft.fftshift(x_freq)
 
         """# Multi-scale Log Gabor filtering in frequency domain
@@ -396,7 +401,8 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
         attended_output = attended_output.sum(dim=1)  # Sum over out_channels
 
         # Learnable frequency band selection
-        freq_mask = torch.zeros((self.out_channels, self.in_channels, height, width), device=self.device)
+        # freq_mask = torch.zeros((self.out_channels, self.in_channels, height, width), device=self.device)
+        freq_mask = torch.zeros((self.out_channels, self.in_channels, height, width)).to(self.device)  # 16_07_2024
         for i in range(self.out_channels):
             for j in range(self.in_channels):
                 start, end = self.freq_band_select[i, j]
@@ -404,7 +410,8 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
                 end_idx = int((end + 1) / 2 * height)
                 freq_mask[i, j, start_idx:end_idx, start_idx:end_idx] = 1
         freq_mask = freq_mask.unsqueeze(0).expand(batch_size, -1, -1, -1, -1)
-        attended_output = attended_output.unsqueeze(1) * freq_mask.unsqueeze(2)
+        # attended_output = attended_output.unsqueeze(1) * freq_mask.unsqueeze(2)
+        attended_output = torch.zeros_like(x_freq_shift, dtype=torch.complex64).to(self.device)  # 16_07_2024
 
         # Convert back to spatial domain
         x_filtered = torch.fft.ifft2(torch.fft.ifftshift(attended_output)).real
@@ -425,4 +432,6 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
     def to(self, device):
         self.device = device
+        self.freq_attention = self.freq_attention.to(device) # 16_07_2024
+        self.conv = self.conv.to(device) # 16_07_2024
         return super(EnhancedFrequencyLogGaborConv2d, self).to(device)
