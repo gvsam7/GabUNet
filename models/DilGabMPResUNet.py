@@ -11,8 +11,8 @@ class DilGabMPResUNet(nn.Module):
 
         # Encoder 1
         # self.conv11 = nn.Conv2d(in_channels, 64, kernel_size=3, padding=1)
-        self.conv11 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
-        # self.conv11 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        # self.conv11 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        self.conv11 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         # self.conv11 = FrequencyLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         # self.conv11 = EnhancedFrequencyLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1, num_scales=3)
         # self.conv11 = EnhancedFrequencyLogGaborConv2d(in_channels, 64, kernel_size=3, num_scales=3)
