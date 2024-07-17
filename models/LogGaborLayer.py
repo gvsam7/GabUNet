@@ -132,15 +132,10 @@ class LogGaborConv2d(nn.Module):
                 roty = -self.x * torch.sin(theta) + self.y * torch.cos(theta)
 
                 r = torch.sqrt(rotx ** 2 + roty ** 2 + self.delta)
-                # Log-Gabor filter
-                # g = torch.exp(-1 * ((torch.log(r) - torch.log(f0)) / (2 * torch.log(sigma / f0))) ** 2)
-                # Bi-dimensional Log-Gabor filter
-                # g = torch.exp(-1 * ((torch.log(r) - torch.log(f0)) / (2 * torch.log(sigma / f0))) ** 2)
-                # g = g * torch.exp(-(theta - theta0) / (2 * sigma ** 2))  # Adjusted term
                 # Log-Gabor filter (radial component)
                 g_radial = torch.exp(-1 * ((torch.log(r) - torch.log(f0)) / (2 * torch.log(sigma / f0))) ** 2)
 
-                # Angular component (squared as suggested)
+                # Angular component
                 g_angular = torch.exp(-((theta - theta0) ** 2) / (2 * sigma ** 2))
 
                 # Combine radial and angular components
@@ -432,6 +427,6 @@ class EnhancedFrequencyLogGaborConv2d(nn.Module):
 
     def to(self, device):
         self.device = device
-        self.freq_attention = self.freq_attention.to(device)  # 16_07_2024
-        self.conv = self.conv.to(device)  # 16_07_2024
+        # self.freq_attention = self.freq_attention.to(device)  # 16_07_2024
+        # self.conv = self.conv.to(device)  # 16_07_2024
         return super(EnhancedFrequencyLogGaborConv2d, self).to(device)
