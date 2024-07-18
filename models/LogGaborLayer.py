@@ -148,6 +148,23 @@ class LogGaborConv2d(nn.Module):
 
 
 class FrequencyLogGaborConv2d(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, **kwargs):
+        super(FrequencyLogGaborConv2d, self).__init__()
+        self.freq_log_gabor = LogGaborConv2d(in_channels * 2, out_channels // 2, kernel_size, **kwargs)
+
+    def forward(self, x):
+        # Frequency Domain Processing
+        x_freq = torch.fft.fft2(x)
+        x_freq = torch.fft.fftshift(x_freq)
+        magnitude = torch.abs(x_freq)
+        phase = torch.angle(x_freq)
+        x_freq = torch.cat([magnitude, phase], dim=1)
+        x_freq = self.freq_log_gabor(x_freq)
+
+        return x_freq
+
+"""
+class FrequencyLogGaborConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False,
                  padding_mode="zeros", use_frequency_domain=True):
         super(FrequencyLogGaborConv2d, self).__init__()
@@ -242,7 +259,7 @@ class FrequencyLogGaborConv2d(nn.Module):
             # Spatial domain only
             x_filtered = self.conv(x)
 
-        return x_filtered
+        return x_filtered"""
 
 
 """
