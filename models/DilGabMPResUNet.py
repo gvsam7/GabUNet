@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from models.ConvBlock import BatchNormReLU, DilResBlockMP, DilDecoder, GaborConv2d, DilResBlockAMP
 from models.LogGaborLayer import LogGaborConv2d, EnhancedFrequencyLogGaborConv2d, FrequencyLogGaborConv2d,\
-    DualDomainLogGaborConv2d
+    DualDomainLogGaborConv2d, DualDomainAttenLogGabConv2d
 
 
 class DilGabMPResUNet(nn.Module):
@@ -15,7 +15,8 @@ class DilGabMPResUNet(nn.Module):
         # self.conv11 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         # self.conv11 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         # self.conv11 = FrequencyLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
-        self.conv11 = DualDomainLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        # self.conv11 = DualDomainLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        self.conv11 = DualDomainAttenLogGabConv2d(in_channels, 64, kernel_size=3, padding=1)
 
         # The following Do not learn during training
         # self.conv11 = EnhancedFrequencyLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1, num_scales=3)
