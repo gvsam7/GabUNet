@@ -15,7 +15,7 @@ class DilGabMPResUNet(nn.Module):
         # self.conv11 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         # self.conv11 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         # self.conv11 = FrequencyLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
-        self.conv11 = DualDomainLogGaborConv2d(in_channels, 64, Kernel_size=3, padding=1)
+        self.conv11 = DualDomainLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
 
         # The following Do not learn during training
         # self.conv11 = EnhancedFrequencyLogGaborConv2d(in_channels, 64, kernel_size=3, padding=1, num_scales=3)
