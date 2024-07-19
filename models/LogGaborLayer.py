@@ -210,7 +210,7 @@ class ChannelAttention(nn.Module):
 
 class DualDomainAttenLogGabConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, **kwargs):
-        super(DualDomainLogGaborConv2d, self).__init__()
+        super(DualDomainAttenLogGabConv2d, self).__init__()
         self.freq_log_gabor = LogGaborConv2d(in_channels * 2, out_channels, kernel_size, **kwargs)
         self.spatial_log_gabor = LogGaborConv2d(in_channels, out_channels, kernel_size, **kwargs)
 
