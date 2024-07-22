@@ -36,9 +36,12 @@ class DualDomAttnDilLogGabMPResUNet(nn.Module):
         self.res4 = DualDomAttnDilResBlockMP(256, 512, stride=2)
 
         # Decoder
-        self.dec1 = DualDomAttnDilDecoder(512, 256)
-        self.dec2 = DualDomAttnDilDecoder(256, 128)
-        self.dec3 = DualDomAttnDilDecoder(128, 64)
+        # self.dec1 = DualDomAttnDilDecoder(512, 256)
+        # self.dec2 = DualDomAttnDilDecoder(256, 128)
+        # self.dec3 = DualDomAttnDilDecoder(128, 64)
+        self.dec1 = DilDecoder(512, 256)
+        self.dec2 = DilDecoder(256, 128)
+        self.dec3 = DilDecoder(128, 64)
 
         # Output
         # self.out = nn.Conv2d(64, 1, kernel_size=1, padding=0)
