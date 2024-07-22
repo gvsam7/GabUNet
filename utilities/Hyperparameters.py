@@ -27,6 +27,7 @@ def arguments():
                                                                'asymunet=AsymUNet, dilmixpgmac_unet=DilMixPGMAC_UNet,'
                                                                'resunet=ResUNet, gabmpresunet=GabMPResUNet,'
                                                                'dilresunnet=DilResUNet, dilgabmpresunet=DilGabMPResUNet,'
+                                                               'dualdomattndilloggabmpresunet=DualDomAttnDilLogGabMPResUNet'
                                                                'vitresunet=VitResUNet, vitresunet18=ViTResUNet18,'
                                                                'unetr_2d=UNETR_2D, dilgabmpvitresunet=DilGabMPViTResUNet')
     # Transformer

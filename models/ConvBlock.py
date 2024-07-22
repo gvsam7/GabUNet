@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch
 from models.GaborLayer import GaborConv2d
 from models.MixPool import MixPool, AdaptiveMixPool
+from models.LogGaborLayer import DualDomainAttenLogGabConv2d
 
 
 class DACBlock(nn.Module):
@@ -43,6 +44,35 @@ class DilResBlock(nn.Module):
         # Convolutional layer
         self.bn1 = BatchNormReLU(in_channels)
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=stride)
+        self.bn2 = BatchNormReLU(out_channels)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, stride=1)
+        # Dilated convolution
+        self.dil = DACBlock(out_channels, out_channels)
+
+        # Shortcut Connection (Identity Mapping)
+        self.skip = nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=stride)
+
+    def forward(self, inputs):
+        x = self.bn1(inputs)
+        x = self.conv1(x)
+        x = self.bn2(x)
+        x = self.conv2(x)
+        # added dilated conv
+        x = self.dil(x)
+        s = self.skip(inputs)
+
+        skip = x + s
+        return skip
+
+
+# Dual Domain Dilated Residual Block 22_07_2024
+class DualDomAttnDilResBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, stride=1):
+        super(DualDomAttnDilResBlock, self).__init__()
+
+        # Convolutional layer
+        self.bn1 = BatchNormReLU(in_channels)
+        self.conv1 = DualDomainAttenLogGabConv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=stride)
         self.bn2 = BatchNormReLU(out_channels)
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, stride=1)
         # Dilated convolution
@@ -187,6 +217,40 @@ class DilResBlockMP(nn.Module):
         skip = x + s
         return skip
 
+# Dual Domain (freq, spatial) 22_07_2024
+class DualDomAttnDilResBlockMP(nn.Module):
+    def __init__(self, in_channels, out_channels, stride=1):
+        super(DualDomAttnDilResBlockMP, self).__init__()
+
+        # Convolutional layer
+        self.bn1 = BatchNormReLU(in_channels)
+        self.conv1 = nn.Sequential(
+            DualDomainAttenLogGabConv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=1),
+                MixPool(2, 2, 0, 0.8)
+            )
+        self.bn2 = BatchNormReLU(out_channels)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, stride=1)
+        # Dilated convolution
+        self.dil = DACBlock(out_channels, out_channels)
+
+        # Shortcut Connection (Identity Mapping)
+        self.skip = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=1),
+                MixPool(2, 2, 0, 0.8)
+            )
+
+    def forward(self, inputs):
+        x = self.bn1(inputs)
+        x = self.conv1(x)
+        x = self.bn2(x)
+        x = self.conv2(x)
+        # added dilated conv
+        x = self.dil(x)
+        s = self.skip(inputs)
+
+        skip = x + s
+        return skip
+
 
 class Decoder(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -208,6 +272,20 @@ class DilDecoder(nn.Module):
 
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         self.res = DilResBlock(in_channels+out_channels, out_channels)
+
+    def forward(self, x, skip):
+        x = self.upsample(x)
+        x = torch.cat([x, skip], axis=1)
+        x = self.res(x)
+        return x
+
+# Dual Domain Dilated Convolutional Decoder 22_07_2024
+class DualDomAttnDilDecoder(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(DualDomAttnDilDecoder, self).__init__()
+
+        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.res = DualDomAttnDilResBlock(in_channels+out_channels, out_channels)
 
     def forward(self, x, skip):
         x = self.upsample(x)

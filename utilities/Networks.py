@@ -11,6 +11,7 @@ from models.ResUNet import ResUNet
 from models.GabMPResUNet import GabMPResUNet
 from models.DilResUNet import DilResUNet
 from models.DilGabMPResUNet import DilGabMPResUNet
+from models.DualDomAttnDilLogGabMPResUNet import DualDomAttnDilLogGabMPResUNet
 from models.ViTResUNet import ViTResUNet
 from models.ViTResUNet18 import ViTResUNet18
 from models.DilGabMPViTResUNet import DilGabMPViTResUNet
@@ -38,6 +39,8 @@ def networks(architecture, in_channels, num_class, config=None, patch_size=None)
         model = DilResUNet(in_channels, num_class)
     elif architecture == 'dilgabmpresunet':
         model = DilGabMPResUNet(in_channels, num_class)
+    elif architecture == 'dualdomattndilloggabmpresunet':
+        model = DualDomAttnDilLogGabMPResUNet(in_channels, num_class)
     elif architecture == 'vitresunet':
         model = ViTResUNet(in_channels, num_class, vit_patch_size=patch_size)
     elif architecture == 'vitresunet18':
