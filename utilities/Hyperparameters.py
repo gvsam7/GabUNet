@@ -16,8 +16,8 @@ def arguments():
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--batch-size", type=int, default=16)
     # parser.add_argument("--grad-accum", type=int, default=16)
-    parser.add_argument("--height", type=int, default=160)
-    parser.add_argument("--width", type=int, default=240)
+    parser.add_argument("--height", type=int, default=256)
+    parser.add_argument("--width", type=int, default=256)
     parser.add_argument("--save-model", default=False)
     parser.add_argument("--load-model", default=False)
     parser.add_argument("--pretrained", default=True)
@@ -25,7 +25,8 @@ def arguments():
     parser.add_argument("--architecture", default='unet', help='unet=UNet, gunet=G_UNet, mac_unet=MAC_UNet, '
                                                                'gmac_unet=GMAC_UNet, mixpgmac_unet=MixPGMAC_UNet,'
                                                                'asymunet=AsymUNet, dilmixpgmac_unet=DilMixPGMAC_UNet,'
-                                                               'resunet=ResUNet, gabmpresunet=GabMPResUNet,'
+                                                               'resunet=ResUNet, resunet18=ResUNet18,'
+                                                               'gabmpresunet=GabMPResUNet,'
                                                                'dilresunnet=DilResUNet, dilgabmpresunet=DilGabMPResUNet,'
                                                                'dualdomattndilloggabmpresunet=DualDomAttnDilLogGabMPResUNet'
                                                                'vitresunet=VitResUNet, vitresunet18=ViTResUNet18,'
