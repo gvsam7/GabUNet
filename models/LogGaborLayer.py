@@ -209,8 +209,52 @@ class ChannelAttention(nn.Module):
 
 
 class DualDomainAttenLogGabConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, **kwargs):
+    def __init__(self, in_channels, out_channels, spatial_kernel_size, freq_kernel_size=256, **kwargs):
         super(DualDomainAttenLogGabConv2d, self).__init__()
+
+        # Use a larger kernel for frequency domain
+        self.freq_log_gabor = LogGaborConv2d(in_channels * 2, out_channels,
+                                             kernel_size=(freq_kernel_size, freq_kernel_size), **kwargs)
+
+        # Keep the spatial domain as before
+        self.spatial_log_gabor = LogGaborConv2d(in_channels, out_channels, kernel_size=spatial_kernel_size, **kwargs)
+
+        self.fusion = nn.Sequential(
+            nn.Conv2d(out_channels * 2, out_channels, kernel_size=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True)
+        )
+
+        self.attention = ChannelAttention(out_channels)
+
+    def forward(self, x):
+        # Frequency Domain Processing
+        x_freq = torch.fft.fft2(x)
+        x_freq = torch.fft.fftshift(x_freq)
+        magnitude = torch.abs(x_freq)
+        phase = torch.angle(x_freq)
+        x_freq = torch.cat([magnitude, phase], dim=1)
+        x_freq = self.freq_log_gabor(x_freq)
+
+        # Spatial Domain Processing
+        x_spatial = self.spatial_log_gabor(x)
+
+        # Resize frequency domain output to match spatial domain output
+        x_freq = F.interpolate(x_freq, size=x_spatial.shape[2:], mode='bilinear', align_corners=False)
+
+        # Combine extracted features from both domains
+        x_combined = torch.cat([x_freq, x_spatial], dim=1)
+        x = self.fusion(x_combined)
+        attention = self.attention(x)
+        return attention
+
+
+# This is working with small kernel_size which is the same for both spatial and frequency domain. However, this small
+# kernel_size in the frequency domain does not capture the global information available in the frequency domain, hence
+# does not harness the benefit of extracting features in the frequency domain.
+class EqualKernelDualDomainAttenLogGabConv2d(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, **kwargs):
+        super(EqualKernelDualDomainAttenLogGabConv2d, self).__init__()
         self.freq_log_gabor = LogGaborConv2d(in_channels * 2, out_channels, kernel_size, **kwargs)
         self.spatial_log_gabor = LogGaborConv2d(in_channels, out_channels, kernel_size, **kwargs)
 
