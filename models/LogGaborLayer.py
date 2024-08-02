@@ -191,7 +191,7 @@ class DualDomainLogGaborConv2d(nn.Module):
 
 
 class FCChannelAttention(nn.Module):
-    def __init__(self, in_channels, reduction_ratio=16):
+    def __init__(self, in_channels, reduction_ratio=2):  # Lower Reduction Ratios: Preserve more information, which can be advantageous for complex tasks but at the cost of increased computational load.
         super(FCChannelAttention, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(
@@ -211,18 +211,18 @@ class FCChannelAttention(nn.Module):
 class ChannelAttention(nn.Module):
     def __init__(self, in_channels, reduction_ratio=2):
         super(ChannelAttention, self).__init__()
-        self.conv = nn.Conv2d(in_channels, in_channels, bias=False)
+        self.conv = nn.Conv2d(in_channels, in_channels, 1, bias=False)
         self.avg_out = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(in_channels, in_channels // reduction_ratio, bias=False),
+            nn.Conv2d(in_channels, in_channels // reduction_ratio, 1, bias=False),
             nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels // reduction_ratio, in_channels, bias=False),
+            nn.Conv2d(in_channels // reduction_ratio, in_channels, 1, bias=False),
         )
         self.max_out = nn.Sequential(
             nn.AdaptiveMaxPool2d(1),
-            nn.Conv2d(in_channels, in_channels // reduction_ratio, bias=False),
+            nn.Conv2d(in_channels, in_channels // reduction_ratio, 1, bias=False),
             nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels // reduction_ratio, in_channels, bias=False)
+            nn.Conv2d(in_channels // reduction_ratio, in_channels, 1, bias=False)
         )
         self.sigmoid = nn.Sigmoid()
 
