@@ -209,7 +209,7 @@ class ChannelAttention(nn.Module):
 
 
 class DualDomainAttenLogGabConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, spatial_kernel_size, freq_kernel_size=256, **kwargs):
+    def __init__(self, in_channels, out_channels, kernel_size, freq_kernel_size=256, **kwargs):
         super(DualDomainAttenLogGabConv2d, self).__init__()
 
         # Use a larger kernel for frequency domain
@@ -217,7 +217,7 @@ class DualDomainAttenLogGabConv2d(nn.Module):
                                              kernel_size=(freq_kernel_size, freq_kernel_size), **kwargs)
 
         # Keep the spatial domain as before
-        self.spatial_log_gabor = LogGaborConv2d(in_channels, out_channels, kernel_size=spatial_kernel_size, **kwargs)
+        self.spatial_log_gabor = LogGaborConv2d(in_channels, out_channels, kernel_size=kernel_size, **kwargs)
 
         self.fusion = nn.Sequential(
             nn.Conv2d(out_channels * 2, out_channels, kernel_size=1),
