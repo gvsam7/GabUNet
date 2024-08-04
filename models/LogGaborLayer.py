@@ -211,7 +211,7 @@ class FCChannelAttention(nn.Module):
 class ChannelAttention(nn.Module):
     def __init__(self, in_channels, reduction_ratio=2):
         super(ChannelAttention, self).__init__()
-        self.conv = nn.Conv2d(in_channels, in_channels, 1, bias=False)
+        # self.conv = nn.Conv2d(in_channels, in_channels, 1, bias=False)
         self.avg_out = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(in_channels, in_channels // reduction_ratio, 1, bias=False),
@@ -227,11 +227,11 @@ class ChannelAttention(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        x = self.conv(x)
+        # x = self.conv(x)
         avg_out = self.avg_out(x)
         max_out = self.max_out(x)
         out = avg_out + max_out
-        del avg_out, max_out
+        # del avg_out, max_out
         return x * self.sigmoid(out)
 
 
