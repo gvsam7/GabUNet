@@ -169,6 +169,61 @@ class ViTResUNet(nn.Module):
         return out
 
 """
+from transformers import ViTModel, ViTConfig
+
+
+class ViTResUNet(nn.Module):
+    def __init__(self, in_channels, num_classes, vit_patch_size=16):
+        super(ViTResUNet, self).__init__()
+        self.num_classes = num_classes
+        self.vit_patch_size = vit_patch_size
+
+        # Encoder
+        self.resnet_encoder = ResNetEncoder(ResBlock, [2, 2, 2, 2], in_channels=in_channels)
+
+        # Load pretrained ViT model
+        self.vit = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
+        self.vit_head = nn.Linear(self.vit.config.hidden_size, 512)  # Adjust if necessary
+
+        # Bridge
+        self.bridge = ResBlock(512, 512, stride=2)
+
+        # Decoder
+        self.dec1 = Decoder(512, 256, output_size=(256, 512))
+        self.dec2 = Decoder(256 + 128, 128, output_size=(128, 256))
+        self.dec3 = Decoder(128 + 192, 64, output_size=(256, 256))
+
+        # Output
+        self.out = nn.Conv2d(64, self.num_classes, kernel_size=1, padding=0)
+
+    def forward(self, x):
+        # Encoder
+        x1 = self.resnet_encoder(x)
+
+        # Vision Transformer
+        x_patch = self.patch_embed(x1)
+        x_patch_flat = x_patch.flatten(2).transpose(1, 2)
+        x_patch_out = self.vit(x_patch_flat).last_hidden_state
+        x_patch_out = self.vit_head(x_patch_out)
+
+        # Reshape to original spatial dimensions
+        num_patches_h, num_patches_w = x_patch.size(2), x_patch.size(3)
+        x_patch_out = x_patch_out.transpose(1, 2).view(-1, 512, num_patches_h, num_patches_w)
+
+        # Bridge
+        bridge_out = self.bridge(x_patch_out)
+
+        # Decoder
+        d1 = self.dec1(bridge_out, x1)
+        d2 = self.dec2(d1, x1)
+        d3 = self.dec3(d2, x1)
+
+        # Output
+        out = self.out(d3)
+
+        return out
+
+
 ######################################## Test the model with dummy input ###############################################
 if __name__ == "__main__":
     # Create a dummy input tensor
