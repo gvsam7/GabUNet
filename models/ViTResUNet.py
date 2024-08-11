@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from einops import rearrange
 from utilities.utils import num_parameters
+from torchinfo import summary
 
 """
 Description: The ViTResUNet model is a fusion of convolutional neural network (CNN) and transformer architectures, 
@@ -19,7 +20,34 @@ class Decoder(nn.Module):
     def __init__(self, in_channels, out_channels, output_size):
         super(Decoder, self).__init__()
         self.output_size = output_size
-        # Initialize the upsample module without specifying scale_factor here
+        self.upsample = nn.Upsample(mode='bilinear', align_corners=True)
+        self.res = ResBlock(in_channels + out_channels + 512, out_channels)  # +512 for transformer output
+
+    def forward(self, x, skip, transformer_out):
+        current_size_h, current_size_w = x.size()[2:]
+        scale_factor_h = self.output_size[0] / current_size_h
+        scale_factor_w = self.output_size[1] / current_size_w
+
+        x = nn.functional.interpolate(x, scale_factor=(scale_factor_h, scale_factor_w), mode='bilinear',
+                                      align_corners=True)
+
+        if skip.size()[2:] != x.size()[2:]:
+            skip = nn.functional.interpolate(skip, size=x.size()[2:], mode='bilinear', align_corners=True)
+
+        if transformer_out.size()[2:] != x.size()[2:]:
+            transformer_out = nn.functional.interpolate(transformer_out, size=x.size()[2:], mode='bilinear',
+                                                        align_corners=True)
+
+        x = torch.cat([x, skip, transformer_out], dim=1)
+        x = self.res(x)
+        return x
+
+"""    
+class Decoder(nn.Module):
+    def __init__(self, in_channels, out_channels, output_size):
+        super(Decoder, self).__init__()
+        self.output_size = output_size
+        # Initialise the upsample module without specifying scale_factor here
         self.upsample = nn.Upsample(mode='bilinear', align_corners=True)
         self.res = ResBlock(in_channels+out_channels, out_channels)
 
@@ -40,7 +68,7 @@ class Decoder(nn.Module):
 
         x = torch.cat([x, skip], dim=1)
         x = self.res(x)
-        return x
+        return x"""
 
 
 class ResBlock(nn.Module):
@@ -131,12 +159,16 @@ class ViTResUNet(nn.Module):
         # Decoder
         self.dec1 = Decoder(512, 256, output_size=(256, 512))
         # self.dec2 = Decoder(in_channels=256 + num_skip_channels, out_channels=128, output_size=(128, 256))
-        self.dec2 = Decoder(256+128, 128, output_size=(128, 256))
-        self.dec3 = Decoder(128+192, 64, output_size=(256, 256))
+        # self.dec2 = Decoder(256+128, 128, output_size=(128, 256))  # without transformer skip connections
+        self.dec2 = Decoder(256, 128, output_size=(128, 256))
+        # self.dec3 = Decoder(128+192, 64, output_size=(256, 256))  # without transformer skip connections
+        self.dec3 = Decoder(128, 64, output_size=(256, 256))
         # Output
         self.out = nn.Conv2d(64, self.num_classes, kernel_size=1, padding=0)
 
-    def forward(self, x):
+    """
+        # Without transformer skip connection (currently tested)
+        def forward(self, x):
         # Encoder
         x1 = self.resnet_encoder(x)
         x_patch = self.patch_embed(x1)
@@ -166,9 +198,38 @@ class ViTResUNet(nn.Module):
         # Output
         out = self.out(d3)
 
+        return out"""
+
+    def forward(self, x):
+        # Encoder
+        x1 = self.resnet_encoder.conv1(x)
+        x1 = self.resnet_encoder.bn1(x1)
+        x1 = self.resnet_encoder.relu(x1)
+        x1 = self.resnet_encoder.maxpool(x1)
+        x1 = self.resnet_encoder.layer1(x1)
+        x2 = self.resnet_encoder.layer2(x1)
+        x3 = self.resnet_encoder.layer3(x2)
+
+        # Patch Embedding and Transformer Encoder
+        x_patch = self.patch_embed(x3)
+        x_patch_flat = x_patch.flatten(2).transpose(1, 2)
+        x_patch_flat = self.transformer_encoder(x_patch_flat)
+        x_patch = x_patch_flat.transpose(1, 2).view(-1, 512, x_patch.size(2), x_patch.size(3))
+
+        # Bridge
+        bridge_out = self.bridge(x_patch)
+
+        # Decoder with skip connections from both ResNet and Transformer
+        d1 = self.dec1(bridge_out, x3, x_patch)
+        d2 = self.dec2(d1, x2, x_patch)
+        d3 = self.dec3(d2, x1, x_patch)
+
+        # Output
+        out = self.out(d3)
         return out
 
 """
+# Pre-trained transformer model
 from transformers import ViTModel, ViTConfig
 
 
@@ -231,6 +292,7 @@ if __name__ == "__main__":
     # Create an instance of the ViTResUNet18 model
     model = ViTResUNet(in_channels=3, num_classes=2, vit_patch_size=1)
     print(model)
+    summary(model)
     n_parameters = num_parameters(model)
     print(f"The model has {n_parameters:,} trainable parameters")
     # Forward pass through the model
