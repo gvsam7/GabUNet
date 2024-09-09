@@ -212,6 +212,9 @@ def database(data):
     elif data == 'treecrown':
         image_path = "Data_TreeCrown/train_images/"
         mask_path = "Data_TreeCrown/train_masks/"
+    elif data == 'treecrowncanada':
+        image_path = "Data_TreeCrownCanada/train_images/"
+        mask_path = "Data_TreeCrownCanada/train_masks/"
     elif data == "treecrown_ndvi":
         image_path = "Data_TreeCrownNDVI/train_images"
         mask_path = "Data_TreeCrownNDVI/train_masks"

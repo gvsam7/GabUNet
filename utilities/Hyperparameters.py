@@ -11,7 +11,7 @@ def arguments():
     parser.add_argument("--in-channels", type=int, default=3)
     parser.add_argument("--num-class", type=int, default=1)
     parser.add_argument("--data", default='landcover_ai', help='water, landcover_ai, WHDLD, uavid, treecrown, '
-                                                               'treecrown_ndvi')
+                                                               'treecrowncanada, treecrown_ndvi')
     parser.add_argument("--saved-images", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--batch-size", type=int, default=16)
@@ -26,6 +26,7 @@ def arguments():
                                                                'gmac_unet=GMAC_UNet, mixpgmac_unet=MixPGMAC_UNet,'
                                                                'asymunet=AsymUNet, dilmixpgmac_unet=DilMixPGMAC_UNet,'
                                                                'resunet=ResUNet, resunet18=ResUNet18,'
+                                                               'dilgabmpresunet18=DilGabMPResUNet18,'
                                                                'gabmpresunet=GabMPResUNet,'
                                                                'dilresunnet=DilResUNet, dilgabmpresunet=DilGabMPResUNet,'
                                                                'dualdomattndilloggabmpresunet=DualDomAttnDilLogGabMPResUNet'
