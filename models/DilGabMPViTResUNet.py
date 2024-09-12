@@ -151,7 +151,7 @@ class DilGabMPViTResUNet(nn.Module):
         self.dec1 = Decoder(512, 256, output_size=(256, 512))
         # self.dec2 = Decoder(in_channels=256 + num_skip_channels, out_channels=128, output_size=(128, 256))
         self.dec2 = Decoder(256+128, 128, output_size=(128, 256))
-        self.dec3 = Decoder(128+192, 64, output_size=(256, 256))
+        self.dec3 = Decoder(128+192, 64, output_size=(768, 768))
         # Output
         self.out = nn.Conv2d(64, self.num_classes, kernel_size=1, padding=0)
 
