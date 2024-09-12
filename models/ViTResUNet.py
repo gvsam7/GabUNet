@@ -133,7 +133,7 @@ class ViTResUNet(nn.Module):
         self.dec1 = Decoder(512, 256, output_size=(256, 512))
         # self.dec2 = Decoder(in_channels=256 + num_skip_channels, out_channels=128, output_size=(128, 256))
         self.dec2 = Decoder(256+128, 128, output_size=(128, 256))
-        self.dec3 = Decoder(128+192, 64, output_size=(256, 256))
+        self.dec3 = Decoder(128+192, 64, output_size=(768, 768))
         # Output
         self.out = nn.Conv2d(64, self.num_classes, kernel_size=1, padding=0)
 
@@ -229,7 +229,7 @@ class ViTResUNet(nn.Module):
 ######################################## Test the model with dummy input ###############################################
 if __name__ == "__main__":
     # Create a dummy input tensor
-    dummy_input = torch.randn(1, 3, 256, 256)  # Assuming input image size is 256x512 and has 3 channels
+    dummy_input = torch.randn(1, 3, 768, 768)  # Assuming input image size is 256x512 and has 3 channels
     # Create an instance of the ViTResUNet18 model
     model = ViTResUNet(in_channels=3, num_classes=2, vit_patch_size=1)
     print(model)
