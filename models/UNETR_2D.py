@@ -1,3 +1,16 @@
+"""
+Author: Georgios Voulgaris
+Date: 20/05/2024
+Description: UNETR_2D:
+            - Architecture: Combines a Vision Transformer (ViT) encoder with a U-Net-style decoder.
+            - Encoder: Uses a pure Transformer encoder to process image patches, capturing global context and long-range
+                       dependencies.
+            - Decoder: Applies de-convolutional layers and concatenates with skip connections from the Transformer
+                       encoder.
+            - Strengths: Effective at capturing both global and local features due to the Transformer encoder's ability
+                         to model long-range dependencies.
+"""
+
 import torch
 import torch.nn as nn
 from utilities.Hyperparameters import arguments
