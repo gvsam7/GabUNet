@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from utilities.Hyperparameters import arguments
+import torch.nn.functional as F
 
 
 class ConvBlock(nn.Module):
@@ -35,7 +36,10 @@ class UNETR_2D(nn.Module):
         self.num_channels = cf["num_channels"]
         self.hidden_dim = cf["hidden_dim"]
         self.patch_embed = nn.Linear(self.patch_size * self.patch_size * self.num_channels, self.hidden_dim)
-        self.pos_embed = nn.Embedding(1000, self.hidden_dim)  # Max number of patches set to 1000 for generalization
+        # Patch size = 16x16 → (768 // 16) * (768 // 16) = 48 * 48 = 2304 patches
+        # Patch size = 512x512 -> (512 // 16) * (512 // 16) = 32 * 32 = 1024 patches
+        # Patch size = 32x32 → (768 // 32) * (768 // 32) = 24 * 24 = 576 patches
+        self.pos_embed = nn.Embedding(1000, self.hidden_dim)  # Max number of patches set to 1000 for generalisation
 
         # Transformer Encoder
         self.trans_encoder_layers = nn.ModuleList([
@@ -152,6 +156,7 @@ class UNETR_2D(nn.Module):
         # Decoder 4
         x = self.d4(x)
         s = self.s4(z0)
+        x = F.interpolate(x, size=s.shape[2:], mode='bilinear', align_corners=False)  # Added for patch-size=32, remove for 16
         x = torch.cat([x, s], dim=1)
         x = self.c4(x)
 
@@ -176,7 +181,7 @@ if __name__ == "__main__":
     }
 
     # Define an input
-    x = torch.randn(8, 3, 128, 128)
+    x = torch.randn(8, 3, 768, 768)
 
     model = UNETR_2D(in_channels=3, num_class=2, cf=config)
     y = model(x)
