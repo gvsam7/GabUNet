@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from models.ConvBlock import GaborConv2d, DACBlock
 from models.MixPool import MixPool
+from models.LogGaborLayer import LogGaborConv2d
 from utilities.utils import num_parameters
 
 """
@@ -93,7 +94,8 @@ class ResNetEncoder(nn.Module):
         super(ResNetEncoder, self).__init__()
         self.in_channels = 64
         # self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        self.conv1 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        # self.conv1 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        self.conv11 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
