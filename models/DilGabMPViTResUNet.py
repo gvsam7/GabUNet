@@ -141,8 +141,8 @@ class DilGabMPViTResUNet(nn.Module):
         self.patch_embed = nn.Conv2d(256, 512, kernel_size=vit_patch_size, stride=vit_patch_size)
 
         self.transformer_encoder = nn.TransformerEncoder(
-            nn.TransformerEncoderLayer(d_model=512, nhead=8),
-            num_layers=8  # num_layers=4
+            nn.TransformerEncoderLayer(d_model=512, nhead=10),
+            num_layers=4  # num_layers=4
         )
 
         # Bridge
