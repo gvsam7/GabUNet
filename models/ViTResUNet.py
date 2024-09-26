@@ -121,7 +121,7 @@ class ViTResUNet(nn.Module):
         self.patch_embed = nn.Conv2d(256, 512, kernel_size=vit_patch_size, stride=vit_patch_size)
 
         self.transformer_encoder = nn.TransformerEncoder(
-            nn.TransformerEncoderLayer(d_model=512, nhead=10),
+            nn.TransformerEncoderLayer(d_model=512, nhead=8),
             num_layers=4
         )
 
