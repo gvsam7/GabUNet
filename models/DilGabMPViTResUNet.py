@@ -94,8 +94,8 @@ class ResNetEncoder(nn.Module):
         super(ResNetEncoder, self).__init__()
         self.in_channels = 64
         # self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        # self.conv1 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
-        self.conv1 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        self.conv1 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        # self.conv1 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -142,7 +142,7 @@ class DilGabMPViTResUNet(nn.Module):
 
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=512, nhead=8),
-            num_layers=4
+            num_layers=6  # num_layers=4
         )
 
         # Bridge
@@ -193,7 +193,7 @@ class DilGabMPViTResUNet(nn.Module):
 ######################################## Test the model with dummy input ###############################################
 if __name__ == "__main__":
     # Create a dummy input tensor
-    dummy_input = torch.randn(1, 3, 128, 128)  # Assuming input image size is 256x512 and has 3 channels
+    dummy_input = torch.randn(1, 3, 768, 768)  # Assuming input image size is 256x512 and has 3 channels
     # Create an instance of the ViTResUNet18 model
     model = DilGabMPViTResUNet(in_channels=3, num_classes=2, vit_patch_size=1)
     print(model)
