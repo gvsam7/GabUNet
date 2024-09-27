@@ -236,7 +236,7 @@ class ChannelAttention(nn.Module):
 
 
 class DualDomainAttenLogGabConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, freq_kernel_size=256, **kwargs):
+    def __init__(self, in_channels, out_channels, kernel_size, freq_kernel_size=768, **kwargs):  # freq_kernel_size=256
         super(DualDomainAttenLogGabConv2d, self).__init__()
 
         # Use a larger kernel for frequency domain
