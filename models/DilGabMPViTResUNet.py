@@ -21,7 +21,7 @@ class Decoder(nn.Module):
     def __init__(self, in_channels, out_channels, output_size):
         super(Decoder, self).__init__()
         self.output_size = output_size
-        # Initialize the upsample module without specifying scale_factor here
+        # Initialise the upsample module without specifying scale_factor here
         self.upsample = nn.Upsample(mode='bilinear', align_corners=True)
         self.res = ResBlock(in_channels+out_channels, out_channels)
 
@@ -94,8 +94,8 @@ class ResNetEncoder(nn.Module):
         super(ResNetEncoder, self).__init__()
         self.in_channels = 64
         # self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        self.conv1 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
-        # self.conv1 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        # self.conv1 = GaborConv2d(in_channels, 64, kernel_size=3, padding=1)
+        self.conv1 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -142,7 +142,7 @@ class DilGabMPViTResUNet(nn.Module):
 
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=512, nhead=8),
-            num_layers=16  # num_layers=4
+            num_layers=4  # num_layers=4
         )
 
         # Bridge
