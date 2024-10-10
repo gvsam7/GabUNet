@@ -122,7 +122,7 @@ class ViTResUNet(nn.Module):
 
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=512, nhead=4),
-            num_layers=16
+            num_layers=4
         )
 
         # Bridge
