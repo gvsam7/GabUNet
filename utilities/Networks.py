@@ -15,11 +15,13 @@ from models.DilGabMPResUNet import DilGabMPResUNet
 from models.DualDomAttnDilLogGabMPResUNet import DualDomAttnDilLogGabMPResUNet
 from models.ViTResUNet import ViTResUNet
 from models.ViTResUNet18 import ViTResUNet18
+from models.DilGabMPResUNet18 import DilGabMPResUNet18
 from models.DilGabMPViTResUNet import DilGabMPViTResUNet
 from models.UNETR_2D import UNETR_2D
+from models.SwinUNet import SwinUNet
 
 
-def networks(architecture, in_channels, num_class, config=None, patch_size=None):
+def networks(architecture, in_channels, num_class, config=None, config2=None, patch_size=None):
     if architecture == 'unet':
         model = UNet(in_channels, num_class)
     elif architecture == 'mac_unet':
@@ -36,6 +38,8 @@ def networks(architecture, in_channels, num_class, config=None, patch_size=None)
         model = ResUNet(in_channels, num_class)
     elif architecture == 'resunet18':
         model = ResUNet18(in_channels, num_class)
+    elif architecture == 'dilgabmpresunet18':
+        model = DilGabMPResUNet18(in_channels, num_class)
     elif architecture =='gabmpresunet':
         model = GabMPResUNet(in_channels, num_class)
     elif architecture == 'dilresunet':
@@ -50,6 +54,10 @@ def networks(architecture, in_channels, num_class, config=None, patch_size=None)
         model = ViTResUNet18(in_channels, num_class)
     elif architecture == 'dilgabmpvitresunet':
         model = DilGabMPViTResUNet(in_channels, num_class, vit_patch_size=patch_size)
+    elif architecture == 'swinunet':
+        if config2 is None:
+            raise ValueError("Config2 dictionary is required for SwinUNet model")
+        model = SwinUNet(in_channels, num_class, config2)
     elif architecture == 'unetr_2d':
         if config is None:
             raise ValueError("Config dictionary is required for UNETR_2D model")

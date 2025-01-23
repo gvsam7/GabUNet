@@ -106,6 +106,13 @@ def main():
         "num_channels": args.in_channels
     }
 
+    config2 = {
+        "H": args.image_size,
+        "W": args.image_size,
+        "C": 64,
+        "in_channels": args.in_channels
+    }
+
     # Clear wandb cache
     clear_wandb_cache()
     # wandb.init(entity="predictive-analytics-lab", project="SemSeg", config=args)
@@ -199,6 +206,7 @@ def main():
     #                  config=config if args.architecture == 'unetr_2d' else None).to(device)
     model = networks(architecture=args.architecture, in_channels=args.in_channels, num_class=args.num_class,
                      config=config if args.architecture == 'unetr_2d' else None,
+                     config2=config2 if args.architecture == 'swinunet' else None,
                      patch_size=args.patch_size if args.architecture in ['vitresunet', 'dilgabmpvitresunet'] else None).to(device)
 
     print(model)

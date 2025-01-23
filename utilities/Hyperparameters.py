@@ -31,6 +31,7 @@ def arguments():
                                                                'dilresunnet=DilResUNet, dilgabmpresunet=DilGabMPResUNet,'
                                                                'dualdomattndilloggabmpresunet=DualDomAttnDilLogGabMPResUNet'
                                                                'vitresunet=VitResUNet, vitresunet18=ViTResUNet18,'
+                                                               'swinunet=SwinUNet'
                                                                'unetr_2d=UNETR_2D, dilgabmpvitresunet=DilGabMPViTResUNet')
     # Transformer
     parser.add_argument("--image-size", type=int, default=128)
