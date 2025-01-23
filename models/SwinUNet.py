@@ -1,9 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from einops import rearrange
-from timm.models.swin_transformer import SwinTransformer
-from utilities.utils import num_parameters
 import math
 
 
