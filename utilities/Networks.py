@@ -15,7 +15,6 @@ from models.DilGabMPResUNet import DilGabMPResUNet
 from models.DualDomAttnDilLogGabMPResUNet import DualDomAttnDilLogGabMPResUNet
 from models.ViTResUNet import ViTResUNet
 from models.ViTResUNet18 import ViTResUNet18
-from models.DilGabMPResUNet18 import DilGabMPResUNet18
 from models.DilGabMPViTResUNet import DilGabMPViTResUNet
 from models.UNETR_2D import UNETR_2D
 from models.SwinUNet import SwinUNet
