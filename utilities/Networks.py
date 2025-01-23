@@ -18,6 +18,7 @@ from models.ViTResUNet18 import ViTResUNet18
 from models.DilGabMPViTResUNet import DilGabMPViTResUNet
 from models.UNETR_2D import UNETR_2D
 from models.SwinUNet import SwinUNet
+from models.DeepLabV3Plus import DeepLabV3Plus
 
 
 def networks(architecture, in_channels, num_class, config=None, config2=None, patch_size=None):
@@ -45,6 +46,8 @@ def networks(architecture, in_channels, num_class, config=None, config2=None, pa
         model = DilGabMPResUNet(in_channels, num_class)
     elif architecture == 'dualdomattndilloggabmpresunet':
         model = DualDomAttnDilLogGabMPResUNet(in_channels, num_class)
+    elif architecture == 'deeplabv3plus':
+        model = DeepLabV3Plus(in_channels, num_class)
     elif architecture == 'vitresunet':
         model = ViTResUNet(in_channels, num_class, vit_patch_size=patch_size)
     elif architecture == 'vitresunet18':
