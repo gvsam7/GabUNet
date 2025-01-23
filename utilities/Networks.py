@@ -38,8 +38,6 @@ def networks(architecture, in_channels, num_class, config=None, config2=None, pa
         model = ResUNet(in_channels, num_class)
     elif architecture == 'resunet18':
         model = ResUNet18(in_channels, num_class)
-    elif architecture == 'dilgabmpresunet18':
-        model = DilGabMPResUNet18(in_channels, num_class)
     elif architecture =='gabmpresunet':
         model = GabMPResUNet(in_channels, num_class)
     elif architecture == 'dilresunet':
