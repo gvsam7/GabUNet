@@ -107,9 +107,9 @@ def main():
     }
 
     config2 = {
-        "H": args.image_size,
-        "W": args.image_size,
-        "C": 64,
+        "height": args.image_size,
+        "width": args.image_size,
+        "C": 64,  # Number of channels in SwinUNet encoder
         "in_channels": args.in_channels
     }
 

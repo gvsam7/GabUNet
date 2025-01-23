@@ -280,8 +280,14 @@ class Decoder(nn.Module):
 
 
 class SwinUNet(nn.Module):
-    def __init__(self, H, W, in_channels, C, num_class, num_blocks=3, patch_size=4):
+    # def __init__(self, H, W, in_channels, C, num_class, num_blocks=3, patch_size=4):
+    def __init__(self, in_channels, num_class, cf, num_blocks=3, patch_size=4):
         super().__init__()
+        self.cf = cf
+
+        H = cf['height']
+        W = cf['width']
+        C = cf['C']
         self.patch_embed = PatchEmbedding(in_channels, C, patch_size)
         self.encoder = Encoder(C, (H // patch_size, W // patch_size), num_blocks)
         self.bottleneck = SwinBlock(C * (2 ** num_blocks), (H // (patch_size * (2 ** num_blocks)), W // (patch_size * (2 ** num_blocks))))
