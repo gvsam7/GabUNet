@@ -34,7 +34,7 @@ class BasicBlock(nn.Module):
         # added dilated conv
         out = self.dil(out)
 
-        out += identity
+        out = out + identity
         out = self.relu(out)
         return out
 
