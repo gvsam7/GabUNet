@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from segmentation_models_pytorch.decoders.deeplabv3.decoder import DeepLabV3PlusDecoder
 from utilities.utils import num_parameters
+from models.LogGaborLayer import LogGaborConv2d
 
 
 class BasicBlock(nn.Module):
@@ -37,7 +38,9 @@ class CustomResNet18(nn.Module):
         super(CustomResNet18, self).__init__()
 
         self.in_channels = 64
-        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=1, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        # self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=1, padding=3, bias=False)
+        # self.conv11 = LogGaborConv2d(in_channels, 64, kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
