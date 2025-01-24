@@ -13,7 +13,7 @@ class BasicBlock(nn.Module):
         super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(out_channels)
-        # self.relu = nn.ReLU(inplace=True) # commented for dilated conv
+        self.relu = nn.ReLU(inplace=False)  # instead of inplace=True
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
         # self.bn2 = nn.BatchNorm2d(out_channels)  # commented for dilated conv
         # Dilated convolution
@@ -27,7 +27,7 @@ class BasicBlock(nn.Module):
 
         out = self.conv1(x)
         out = self.bn1(out)
-        # out = self.relu(out)
+        out = self.relu(out)
 
         out = self.conv2(out)
         # out = self.bn2(out)  # commented for dilated conv
