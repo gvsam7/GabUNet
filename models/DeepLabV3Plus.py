@@ -30,7 +30,7 @@ class BasicBlock(nn.Module):
         out = self.relu(out)
 
         out = self.conv2(out)
-        out = self.bn2(out)
+        # out = self.bn2(out)  # commented for dilated conv
         # added dilated conv
         out = self.dil(out)
 
@@ -68,7 +68,7 @@ class CustomResNet18(nn.Module):
         downsample = None
         if stride != 1 or self.in_channels != out_channels:
             downsample = nn.Sequential(
-                # nn.Conv2d(self.in_channels, out_channels, kernel_size=1, stride=stride, bias=False),  # commented for mixpooling 
+                # nn.Conv2d(self.in_channels, out_channels, kernel_size=1, stride=stride, bias=False),  # commented for mixpooling
                 nn.Conv2d(self.in_channels, out_channels, kernel_size=1, stride=1, bias=False),
                 MixPool(2, 2, 0, 0.8),
                 nn.BatchNorm2d(out_channels),
