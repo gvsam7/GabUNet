@@ -32,7 +32,7 @@ class BasicBlock(nn.Module):
         out = self.conv2(out)
         out = self.bn2(out)  # commented for dilated conv
         # added dilated conv
-        # out = self.dil(out)  
+        # out = self.dil(out)
 
         out = out + identity
         out = self.relu(out)
