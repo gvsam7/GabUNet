@@ -142,7 +142,7 @@ class DilGabMPViTResUNet(nn.Module):
 
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=512, nhead=8),  # nhead=8
-            num_layers=32  # num_layers=4
+            num_layers=4  # num_layers=32
         )
 
         # Bridge
