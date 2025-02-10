@@ -32,7 +32,8 @@ def arguments():
                                                                'dualdomattndilloggabmpresunet=DualDomAttnDilLogGabMPResUNet'
                                                                'vitresunet=VitResUNet, vitresunet18=ViTResUNet18,'
                                                                'swinunet=SwinUNet, deeplabveplus=DeepLabV3Plus'
-                                                               'unetr_2d=UNETR_2D, dilgabmpvitresunet=DilGabMPViTResUNet')
+                                                               'unetr_2d=UNETR_2D, dilgabmpvitresunet=DilGabMPViTResUNet,'
+                                                               'transunet=TransUNet')
     # Transformer
     parser.add_argument("--image-size", type=int, default=128)
     parser.add_argument("--num-layers", type=int, default=12)

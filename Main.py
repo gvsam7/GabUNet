@@ -113,6 +113,17 @@ def main():
         "in_channels": args.in_channels
     }
 
+    config3 = {
+        "img_dim": args.image_size,  # Image dimensions (e.g. 256 if the input image is 256x256)
+        "in_channels": args.in_channels,  # Number of input channels (3 for RGB images)
+        "out_channels": 64,  # Base number of channels in the encoder
+        "head_num": args.num_heads,  # Number of attention heads
+        "mlp_dim": 256,  # Dimension for the MLP in the transformer blocks
+        "block_num": args.num_layers,  # Number of transformer encoder blocks
+        "patch_dim": 16,  # Dimension of each patch in the transformer
+        "num_classes": args.num_class  # Number of output classes
+    }
+
     # Clear wandb cache
     clear_wandb_cache()
     # wandb.init(entity="predictive-analytics-lab", project="SemSeg", config=args)
@@ -207,6 +218,7 @@ def main():
     model = networks(architecture=args.architecture, in_channels=args.in_channels, num_class=args.num_class,
                      config=config if args.architecture == 'unetr_2d' else None,
                      config2=config2 if args.architecture == 'swinunet' else None,
+                     config3=config3 if args.architecture == 'transunet' else None,
                      patch_size=args.patch_size if args.architecture in ['vitresunet', 'dilgabmpvitresunet'] else None).to(device)
 
     print(model)

@@ -18,10 +18,11 @@ from models.ViTResUNet18 import ViTResUNet18
 from models.DilGabMPViTResUNet import DilGabMPViTResUNet
 from models.UNETR_2D import UNETR_2D
 from models.SwinUNet import SwinUNet
+from models.TransUNet import TransUNet
 from models.DeepLabV3Plus import DeepLabV3Plus
 
 
-def networks(architecture, in_channels, num_class, config=None, config2=None, patch_size=None):
+def networks(architecture, in_channels, num_class, config=None, config2=None, config3=None, patch_size=None):
     if architecture == 'unet':
         model = UNet(in_channels, num_class)
     elif architecture == 'mac_unet':
@@ -58,6 +59,10 @@ def networks(architecture, in_channels, num_class, config=None, config2=None, pa
         if config2 is None:
             raise ValueError("Config2 dictionary is required for SwinUNet model")
         model = SwinUNet(in_channels, num_class, config2)
+    elif architecture == 'transunet':
+        if config2 is None:
+            raise ValueError("Config3 dictionary is required for TransUNet model")
+        model = TransUNet(in_channels, num_class, config3)
     elif architecture == 'unetr_2d':
         if config is None:
             raise ValueError("Config dictionary is required for UNETR_2D model")
