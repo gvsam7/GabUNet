@@ -60,7 +60,7 @@ def networks(architecture, in_channels, num_class, config=None, config2=None, co
             raise ValueError("Config2 dictionary is required for SwinUNet model")
         model = SwinUNet(in_channels, num_class, config2)
     elif architecture == 'transunet':
-        if config2 is None:
+        if config3 is None:
             raise ValueError("Config3 dictionary is required for TransUNet model")
         model = TransUNet(in_channels, num_class, config3)
     elif architecture == 'unetr_2d':
