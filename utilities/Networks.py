@@ -62,6 +62,8 @@ def networks(architecture, in_channels, num_class, config=None, config2=None, co
     elif architecture == 'transunet':
         if config3 is None:
             raise ValueError("Config3 dictionary is required for TransUNet model")
+        # Print config3 to verify its content
+        print("Config3:", config3)
         model = TransUNet(in_channels, num_class, config3)
     elif architecture == 'unetr_2d':
         if config is None:
