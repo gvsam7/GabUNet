@@ -262,8 +262,17 @@ class Decoder(nn.Module):
 
 
 class TransUNet(nn.Module):
-    def __init__(self, img_dim, in_channels, out_channels, head_num, mlp_dim, block_num, patch_dim, num_classes):
+    # def __init__(self, img_dim, in_channels, out_channels, head_num, mlp_dim, block_num, patch_dim, num_classes): for testing
+    def __init__(self, img_dim, in_channels, out_channels, cf):
         super().__init__()
+        self.cf = cf
+
+        # Patch + Position Embeddings
+        head_num = cf["head_num"]
+        mlp_dim = cf["mlp_dim"]
+        block_num = cf["block_num"]
+        patch_dim = cf["patch_dim"]
+        num_classes = cf["num_classes"]
 
         self.encoder = Encoder(img_dim, in_channels, out_channels,
                                head_num, mlp_dim, block_num, patch_dim, num_classes)
