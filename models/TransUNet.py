@@ -263,7 +263,7 @@ class Decoder(nn.Module):
 
 class TransUNet(nn.Module):
     # def __init__(self, img_dim, in_channels, out_channels, head_num, mlp_dim, block_num, patch_dim, num_classes): for testing
-    def __init__(self, in_channels, out_channels, config3):
+    def __init__(self, in_channels, num_classes, config3):
         super().__init__()
         cf = config3
 
@@ -273,7 +273,7 @@ class TransUNet(nn.Module):
         mlp_dim = cf["mlp_dim"]
         block_num = cf["block_num"]
         patch_dim = cf["patch_dim"]
-        num_classes = cf["num_classes"]
+        out_channels = cf["out_channels"]
 
         self.encoder = Encoder(img_dim, in_channels, out_channels,
                                head_num, mlp_dim, block_num, patch_dim, num_classes)
