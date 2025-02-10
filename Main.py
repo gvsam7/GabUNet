@@ -115,13 +115,11 @@ def main():
 
     config3 = {
         "img_dim": args.image_size,  # Image dimensions (e.g. 256 if the input image is 256x256)
-        "in_channels": args.in_channels,  # Number of input channels (3 for RGB images)
         "out_channels": 64,  # Base number of channels in the encoder
-        "head_num": args.num_heads,  # Number of attention heads
+        "head_num": 8,  # Number of attention heads
         "mlp_dim": 256,  # Dimension for the MLP in the transformer blocks
-        "block_num": args.num_layers,  # Number of transformer encoder blocks
+        "block_num": 12,  # Number of transformer encoder blocks
         "patch_dim": 16,  # Dimension of each patch in the transformer
-        # "num_classes": args.num_class  # Number of output classes
     }
 
     # Clear wandb cache

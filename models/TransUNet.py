@@ -262,7 +262,6 @@ class Decoder(nn.Module):
 
 
 class TransUNet(nn.Module):
-    # def __init__(self, img_dim, in_channels, out_channels, head_num, mlp_dim, block_num, patch_dim, num_classes): for testing
     def __init__(self, in_channels, num_classes, config3):
         super().__init__()
         cf = config3
@@ -290,19 +289,18 @@ class TransUNet(nn.Module):
 """
 ######################################## Test the model with dummy input ###############################################
 if __name__ == "__main__":
+    config = {
+        "img_dim": 256,  # Image dimensions (e.g. 256 if the input image is 256x256)
+        "out_channels": 64,  # Base number of channels in the encoder
+        "head_num": 8,  # Number of attention heads
+        "mlp_dim": 256,  # Dimension for the MLP in the transformer blocks
+        "block_num": 12,  # Number of transformer encoder blocks
+        "patch_dim": 16,  # Dimension of each patch in the transformer
+    }
     # Create a dummy input tensor
     dummy_input = torch.randn(1, 3, 256, 256)  # Assuming input image size is 256x256 and has 3 channels
     # Create an instance of the TransUNet model
-    model = TransUNet(
-        img_dim=256,  # Image dimensions (e.g. 256 if the input image is 256x256)
-        in_channels=3,  # Number of input channels (3 for RGB images)
-        out_channels=64,  # Base number of channels in the encoder
-        head_num=8,  # Number of attention heads
-        mlp_dim=256,  # Dimension for the MLP in the transformer blocks
-        block_num=12,  # Number of transformer encoder blocks
-        patch_dim=16,  # Dimension of each patch in the transformer
-        num_classes=8  # Number of output classes
-    )
+    model = TransUNet(in_channels=3, num_classes=8, config3=config)
 
     print(model)
     n_parameters = num_parameters(model)
@@ -310,4 +308,4 @@ if __name__ == "__main__":
     # Forward pass through the model
     output = model(dummy_input)
     # Print the shape of the output tensor
-    print("Output shape:", output.shape)"""
+    print("Output shape:", output.shape)""" 
