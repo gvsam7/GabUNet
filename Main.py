@@ -121,7 +121,7 @@ def main():
         "mlp_dim": 256,  # Dimension for the MLP in the transformer blocks
         "block_num": args.num_layers,  # Number of transformer encoder blocks
         "patch_dim": 16,  # Dimension of each patch in the transformer
-        "num_classes": args.num_class  # Number of output classes
+        # "num_classes": args.num_class  # Number of output classes
     }
 
     # Clear wandb cache
