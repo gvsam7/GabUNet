@@ -263,9 +263,9 @@ class Decoder(nn.Module):
 
 class TransUNet(nn.Module):
     # def __init__(self, img_dim, in_channels, out_channels, head_num, mlp_dim, block_num, patch_dim, num_classes): for testing
-    def __init__(self, img_dim, in_channels, out_channels, cf):
+    def __init__(self, img_dim, in_channels, out_channels, config3):
         super().__init__()
-        self.cf = cf
+        cf = config3
 
         # Patch + Position Embeddings
         head_num = cf["head_num"]
