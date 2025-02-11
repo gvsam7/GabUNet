@@ -4,6 +4,7 @@ from einops import rearrange
 import numpy as np
 from einops import rearrange, repeat
 from utilities.utils import num_parameters
+import math 
 
 
 class MultiHeadAttention(nn.Module):
@@ -25,7 +26,8 @@ class MultiHeadAttention(nn.Module):
         if mask is not None:
             energy = energy.masked_fill(mask, -np.inf)
 
-        attention = torch.softmax(energy, dim=-1)
+        # attention = torch.softmax(energy, dim=-1)
+        attention = torch.softmax(energy / math.sqrt(self.dk), dim=-1)  # Normalise the attention scores
 
         x = torch.einsum("... i j , ... j d -> ... i d", attention, value)
 
@@ -60,8 +62,8 @@ class TransformerEncoderBlock(nn.Module):
         self.multi_head_attention = MultiHeadAttention(embedding_dim, head_num)
         self.mlp = MLP(embedding_dim, mlp_dim)
 
-        self.layer_norm1 = nn.LayerNorm(embedding_dim)
-        self.layer_norm2 = nn.LayerNorm(embedding_dim)
+        self.layer_norm1 = nn.LayerNorm(embedding_dim, eps=1e-6)  # Added layer normalisation epsilon
+        self.layer_norm2 = nn.LayerNorm(embedding_dim, eps=1e-6)  # Added layer normalisation epsilon
 
         self.dropout = nn.Dropout(0.2)
 
