@@ -117,9 +117,9 @@ def main():
         "img_dim": args.image_size,  # Image dimensions (e.g. 256 if the input image is 256x256)
         "out_channels": 64,  # Base number of channels in the encoder
         "head_num": 8,  # Number of attention heads
-        "mlp_dim": 2048,  # Dimension for the MLP in the transformer blocks, was 256
+        "mlp_dim": 1024,  # Dimension for the MLP in the transformer blocks, was 256
         "block_num": 4,  # Number of transformer encoder blocks (was 12)
-        "patch_dim": 16,  # Dimension of each patch in the transformer
+        "patch_dim": 8,  # Dimension of each patch in the transformer (was 16)
     }
 
     # Clear wandb cache
