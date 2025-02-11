@@ -62,8 +62,8 @@ class TransformerEncoderBlock(nn.Module):
         self.multi_head_attention = MultiHeadAttention(embedding_dim, head_num)
         self.mlp = MLP(embedding_dim, mlp_dim)
 
-        self.layer_norm1 = nn.LayerNorm(embedding_dim, eps=1e-6)  # Added layer normalisation epsilon
-        self.layer_norm2 = nn.LayerNorm(embedding_dim, eps=1e-6)  # Added layer normalisation epsilon
+        self.layer_norm1 = nn.LayerNorm(embedding_dim, eps=1e-5)  # Added layer normalisation epsilon (was 1e-6)
+        self.layer_norm2 = nn.LayerNorm(embedding_dim, eps=1e-5)  # Added layer normalisation epsilon (was 1e-6)
 
         self.dropout = nn.Dropout(0.2)
 
@@ -107,7 +107,7 @@ class ViT(nn.Module):
 
         self.projection = nn.Linear(self.token_dim, embedding_dim)
         # self.embedding = nn.Parameter(torch.rand(self.num_tokens + 1, embedding_dim))
-        self.embedding = nn.Parameter(torch.randn(self.num_tokens + 1, embedding_dim) * 0.02)  # Weight initialisation scale
+        self.embedding = nn.Parameter(torch.randn(self.num_tokens + 1, embedding_dim) * 0.01)  # Weight initialisation scale (was 0.02)
 
         self.cls_token = nn.Parameter(torch.randn(1, 1, embedding_dim))
 
