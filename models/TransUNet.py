@@ -4,7 +4,7 @@ from einops import rearrange
 import numpy as np
 from einops import rearrange, repeat
 from utilities.utils import num_parameters
-import math 
+import math
 
 
 class MultiHeadAttention(nn.Module):
@@ -106,7 +106,8 @@ class ViT(nn.Module):
         self.token_dim = in_channels * (patch_dim ** 2)
 
         self.projection = nn.Linear(self.token_dim, embedding_dim)
-        self.embedding = nn.Parameter(torch.rand(self.num_tokens + 1, embedding_dim))
+        # self.embedding = nn.Parameter(torch.rand(self.num_tokens + 1, embedding_dim))
+        self.embedding = nn.Parameter(torch.randn(self.num_tokens + 1, embedding_dim) * 0.02)  # Weight initialisation scale
 
         self.cls_token = nn.Parameter(torch.randn(1, 1, embedding_dim))
 
