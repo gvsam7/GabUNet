@@ -115,9 +115,9 @@ def main():
 
     config3 = {
         "img_dim": args.image_size,  # Image dimensions (e.g. 256 if the input image is 256x256)
-        "out_channels": 64,  # Base number of channels in the encoder
+        "out_channels": 128,  # Base number of channels in the encoder was 64
         "head_num": 8,  # Number of attention heads
-        "mlp_dim": 256,  # Dimension for the MLP in the transformer blocks
+        "mlp_dim": 2048,  # Dimension for the MLP in the transformer blocks, was 256
         "block_num": 12,  # Number of transformer encoder blocks
         "patch_dim": 16,  # Dimension of each patch in the transformer
     }
