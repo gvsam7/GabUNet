@@ -461,6 +461,8 @@ def check_accuracy(loader, model, num_class, device="cuda"):
     wandb.log({"Accuracy": accuracy})
     wandb.log({"mIoU Score": med_jaccard/len(loader)})
 
+    return accuracy / len(loader)  # for TransUNet
+
 
 def IoU(pred_mask, mask, n_classes, smooth=1e-10):
     with torch.no_grad():
