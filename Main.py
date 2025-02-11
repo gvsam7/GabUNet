@@ -230,7 +230,15 @@ def main():
     # optimizer = optim.Adam(model.parameters(), lr=args.lr)
     optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)  # for TransUNet
     # Initialise the scheduler
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)  # for TransUNet
+    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)  # for TransUNet
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        mode='max',
+        factor=0.5,
+        patience=5,
+        verbose=True,
+        min_lr=1e-6
+    )
 
     train_loader, val_loader, test_loader, test_ds = get_loaders(
         image_path,
@@ -285,9 +293,9 @@ def main():
                 save_checkpoint(checkpoint)
 
         # check accuracy
-        check_accuracy(val_loader, model, device=device, num_class=args.num_class)
+        val_score = check_accuracy(val_loader, model, device=device, num_class=args.num_class)
         # Update the learning rate
-        scheduler.step()  # for TransUNet
+        scheduler.step(val_score)  # for TransUNet
         print("Epoch:{}/{}..".format(epoch + 1, args.epochs),
               "Time: {:.2f}m".format((time.time() - since) / 60))
 
