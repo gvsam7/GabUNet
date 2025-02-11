@@ -118,7 +118,7 @@ def main():
         "out_channels": 64,  # Base number of channels in the encoder
         "head_num": 8,  # Number of attention heads
         "mlp_dim": 2048,  # Dimension for the MLP in the transformer blocks, was 256
-        "block_num": 12,  # Number of transformer encoder blocks
+        "block_num": 4,  # Number of transformer encoder blocks (was 12)
         "patch_dim": 16,  # Dimension of each patch in the transformer
     }
 
