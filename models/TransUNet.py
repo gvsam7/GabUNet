@@ -42,9 +42,9 @@ class MLP(nn.Module):
         self.mlp_layers = nn.Sequential(
             nn.Linear(embedding_dim, mlp_dim),
             nn.GELU(),
-            nn.Dropout(0.1),
+            nn.Dropout(0.2),
             nn.Linear(mlp_dim, embedding_dim),
-            nn.Dropout(0.1)
+            nn.Dropout(0.2)
         )
 
     def forward(self, x):
@@ -63,7 +63,7 @@ class TransformerEncoderBlock(nn.Module):
         self.layer_norm1 = nn.LayerNorm(embedding_dim)
         self.layer_norm2 = nn.LayerNorm(embedding_dim)
 
-        self.dropout = nn.Dropout(0.1)
+        self.dropout = nn.Dropout(0.2)
 
     def forward(self, x):
         _x = self.multi_head_attention(x)
@@ -108,7 +108,7 @@ class ViT(nn.Module):
 
         self.cls_token = nn.Parameter(torch.randn(1, 1, embedding_dim))
 
-        self.dropout = nn.Dropout(0.1)
+        self.dropout = nn.Dropout(0.2)
 
         self.transformer = TransformerEncoder(embedding_dim, head_num, mlp_dim, block_num)
 
@@ -308,4 +308,4 @@ if __name__ == "__main__":
     # Forward pass through the model
     output = model(dummy_input)
     # Print the shape of the output tensor
-    print("Output shape:", output.shape)""" 
+    print("Output shape:", output.shape)"""
