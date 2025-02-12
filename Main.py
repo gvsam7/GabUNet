@@ -118,7 +118,7 @@ def main():
         "out_channels": 64,  # Base number of channels in the encoder
         "head_num": 8,  # Number of attention heads
         "mlp_dim": 1024,  # Dimension for the MLP in the transformer blocks, was 256
-        "block_num": 12,  # Number of transformer encoder blocks (was 12)
+        "block_num": 4,  # Number of transformer encoder blocks (was 12-flats out during training)
         "patch_dim": 16,  # Dimension of each patch in the transformer (was 16)
     }
 
@@ -230,7 +230,6 @@ def main():
     # optimizer = optim.Adam(model.parameters(), lr=args.lr)
     optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)  # for TransUNet
     # Initialise the scheduler
-    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)  # for TransUNet
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
         mode='max',
@@ -238,7 +237,7 @@ def main():
         patience=5,
         verbose=True,
         min_lr=1e-6
-    )
+    )  # for TransUNet
 
     train_loader, val_loader, test_loader, test_ds = get_loaders(
         image_path,
