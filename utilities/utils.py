@@ -285,7 +285,7 @@ def plot(image, mask, pred_mask, score):
     ax3.plot()
 
 
-def jaccard(pred_mask, mask, smooth=1e-10, n_classes=16):
+def jaccard(pred_mask, mask, smooth=1e-10, n_classes=8):
     with torch.no_grad():
         pred_mask = F.softmax(pred_mask, dim=1)
         pred_mask = torch.argmax(pred_mask, dim=1)
@@ -297,13 +297,13 @@ def jaccard(pred_mask, mask, smooth=1e-10, n_classes=16):
             true_class = pred_mask == clas
             true_label = mask == clas
 
-            if true_label.long().sum().item() == 0: #no exist label in this loop
+            if true_label.long().sum().item() == 0: # no exist label in this loop
                 iou_per_class.append(np.nan)
             else:
                 intersect = torch.logical_and(true_class, true_label).sum().float().item()
                 union = torch.logical_or(true_class, true_label).sum().float().item()
 
-                iou = (intersect + smooth) / (union +smooth)
+                iou = (intersect + smooth) / (union + smooth)
                 iou_per_class.append(iou)
         return np.nanmean(iou_per_class)
 
