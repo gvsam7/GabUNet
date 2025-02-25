@@ -227,8 +227,8 @@ def main():
     else:
         criterion = nn.CrossEntropyLoss()
     print(f"criterion: {criterion}")
-    # optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)  # for TransUNet
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    # optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)  # for TransUNet
     # Initialise the scheduler
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
@@ -292,10 +292,10 @@ def main():
                 save_checkpoint(checkpoint)
 
         # check accuracy
-        # check_accuracy(val_loader, model, device=device, num_class=args.num_class)
-        val_score = check_accuracy(val_loader, model, device=device, num_class=args.num_class)
+        check_accuracy(val_loader, model, device=device, num_class=args.num_class)
+        # val_score = check_accuracy(val_loader, model, device=device, num_class=args.num_class)
         # Update the learning rate
-        scheduler.step(val_score)  # for TransUNet
+        # scheduler.step(val_score)  # for TransUNet
         print("Epoch:{}/{}..".format(epoch + 1, args.epochs),
               "Time: {:.2f}m".format((time.time() - since) / 60))
 

@@ -285,7 +285,7 @@ def plot(image, mask, pred_mask, score):
     ax3.plot()
 
 
-def jaccard(pred_mask, mask, smooth=1e-10, n_classes=8):
+def jaccard(pred_mask, mask, smooth=1e-10, n_classes=5):
     with torch.no_grad():
         pred_mask = F.softmax(pred_mask, dim=1)
         pred_mask = torch.argmax(pred_mask, dim=1)
@@ -305,7 +305,7 @@ def jaccard(pred_mask, mask, smooth=1e-10, n_classes=8):
 
                 iou = (intersect + smooth) / (union + smooth)
                 iou_per_class.append(iou)
-        return np.nanmean(iou_per_class)
+        # return np.nanmean(iou_per_class)
 
 
 def predict_image_mask_miou(model, image, mask, device='cpu'):
