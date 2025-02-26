@@ -229,7 +229,7 @@ def main():
     print(f"criterion: {criterion}")
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     # optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)  # for TransUNet
-    # Initialise the scheduler
+    """ # Initialise the scheduler
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
         mode='max',
@@ -237,7 +237,7 @@ def main():
         patience=5,
         verbose=True,
         min_lr=1e-6
-    )  # for TransUNet
+    )  # for TransUNet"""
 
     train_loader, val_loader, test_loader, test_ds = get_loaders(
         image_path,
