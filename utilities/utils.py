@@ -305,7 +305,7 @@ def jaccard(pred_mask, mask, smooth=1e-10, n_classes=5):
 
                 iou = (intersect + smooth) / (union + smooth)
                 iou_per_class.append(iou)
-        # return np.nanmean(iou_per_class)
+        return np.nanmean(iou_per_class)
 
 
 def predict_image_mask_miou(model, image, mask, device='cpu'):
@@ -461,7 +461,7 @@ def check_accuracy(loader, model, num_class, device="cuda"):
     wandb.log({"Accuracy": accuracy})
     wandb.log({"mIoU Score": med_jaccard/len(loader)})
 
-    return med_jaccard / len(loader)  # for TransUNet
+    # return med_jaccard / len(loader)  # for TransUNet
 
 
 def IoU(pred_mask, mask, n_classes, smooth=1e-10):
