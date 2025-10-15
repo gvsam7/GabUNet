@@ -186,6 +186,22 @@ def get_loaders(
     save_loader_to_csv(val_loader, val_ds, 'val_loader.csv')
     save_loader_to_csv(test_loader, test_ds, 'test_loader.csv')
 
+    # ---------- DIAGNOSTIC: batch / dataset checks ----------
+    print("DEBUG: dataset_len", len(train_loader.dataset),
+          "batch_size", train_loader.batch_size,
+          "drop_last", getattr(train_loader, "drop_last", None))
+    print("DEBUG: remainder", len(train_loader.dataset) % train_loader.batch_size)
+
+    singleton_found = False
+    for i, (x, _) in enumerate(train_loader):
+        if x.size(0) == 1:
+            print("DEBUG: singleton batch at iter", i)
+            singleton_found = True
+            break
+    if not singleton_found:
+        print("DEBUG: no singleton batches detected in one epoch scan")
+    # --------------------------------------------------------
+
     return train_loader, val_loader, test_loader, test_ds
 
 
