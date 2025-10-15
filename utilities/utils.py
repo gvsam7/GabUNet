@@ -218,6 +218,9 @@ def database(data):
     elif data == "treecrown_ndvi":
         image_path = "Data_TreeCrownNDVI/train_images"
         mask_path = "Data_TreeCrownNDVI/train_masks"
+    elif data == 'water_ground':
+        image_path = "Data_Water_Ground/train_images"
+        mask_path = "Data_Water_Ground/train_masks"
     else:
         image_path = "Data_Water/train_images/"
         mask_path = "Data_Water/train_masks/"
