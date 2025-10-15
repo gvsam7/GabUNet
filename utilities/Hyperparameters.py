@@ -31,7 +31,7 @@ def arguments():
                                                                'dilresunnet=DilResUNet, dilgabmpresunet=DilGabMPResUNet,'
                                                                'dualdomattndilloggabmpresunet=DualDomAttnDilLogGabMPResUNet'
                                                                'vitresunet=VitResUNet, vitresunet18=ViTResUNet18,'
-                                                               'swinunet=SwinUNet, deeplabveplus=DeepLabV3Plus'
+                                                               'swinunet=SwinUNet, deeplabv3plus=DeepLabV3Plus'
                                                                'unetr_2d=UNETR_2D, dilgabmpvitresunet=DilGabMPViTResUNet,'
                                                                'transunet=TransUNet')
     # Transformer

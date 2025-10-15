@@ -149,6 +149,7 @@ def get_loaders(
         num_workers=num_workers,
         pin_memory=pin_memory,
         shuffle=True,
+        drop_last=True,  # <<< added 15/10/2025 -> drop the last incomplete batch so never trains on a batch of size 1
     )
 
     val_ds = Dataset(
@@ -186,7 +187,7 @@ def get_loaders(
     save_loader_to_csv(val_loader, val_ds, 'val_loader.csv')
     save_loader_to_csv(test_loader, test_ds, 'test_loader.csv')
 
-    # ---------- DIAGNOSTIC: batch / dataset checks ----------
+    # ---------- DIAGNOSTIC: batch / dataset checks ---------- 15/10/2025
     print("DEBUG: dataset_len", len(train_loader.dataset),
           "batch_size", train_loader.batch_size,
           "drop_last", getattr(train_loader, "drop_last", None))
